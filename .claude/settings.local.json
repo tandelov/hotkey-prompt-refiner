@@ -50,7 +50,10 @@
       "Bash(for:*)",
       "Bash(curl:*)",
       "Bash(sh:*)",
-      "Bash(source:*)"
+      "Bash(source:*)",
+      "Bash(ANTHROPIC_API_KEY=\"sk-test-key-12345\" ./target/debug/hotkey-prompt-refiner)",
+      "Bash(./target/debug/hotkey-prompt-refiner)",
+      "Bash(pbcopy)"
     ]
   },
   "enableAllProjectMcpServers": false
