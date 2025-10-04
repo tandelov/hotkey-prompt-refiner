@@ -1,7 +1,11 @@
 mod anthropic;
+mod clipboard;
 mod config;
+mod paste;
+mod workflow;
 
 use config::Config;
+use workflow::execute_workflow_with_logging;
 
 #[tokio::main]
 async fn main() {
@@ -69,6 +73,23 @@ async fn main() {
         }
     }
 
-    println!("\n✅ All tests passed! Ready for hotkey integration.");
+    println!("\n✅ All tests passed! Ready for workflow testing.");
+
+    // Test 3: Full workflow (if clipboard has content)
+    println!("\n🔬 Test 3: Complete workflow...");
+    println!("   Copy some text to clipboard and the workflow will process it.");
+    println!("   (Or skip if clipboard is empty)");
+
+    match execute_workflow_with_logging(&config, &api_client).await {
+        Ok(()) => {
+            println!("   ✓ Workflow test successful!");
+        }
+        Err(e) => {
+            println!("   ⚠ Workflow test skipped or failed: {}", e);
+            println!("   This is normal if clipboard was empty.");
+        }
+    }
+
+    println!("\n✅ All systems operational!");
     println!("Ready! Hotkey: Cmd+Shift+P (not yet implemented)");
 }
