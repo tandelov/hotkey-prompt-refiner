@@ -41,7 +41,8 @@
       "WebFetch(domain:github.com)",
       "WebSearch",
       "Bash(test:*)",
-      "SlashCommand(/pm:epic-sync hotkey-prompt-refiner)"
+      "SlashCommand(/pm:epic-sync hotkey-prompt-refiner)",
+      "SlashCommand(/pm:epic-start:*)"
     ]
   },
   "enableAllProjectMcpServers": false
