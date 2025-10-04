@@ -6,6 +6,7 @@ edition = "2024"
 [dependencies]
 # System integration
 global-hotkey = "0.6"
+tao = "0.30"
 arboard = "3.4"
 enigo = "0.2"
 dotenv = "0.15"

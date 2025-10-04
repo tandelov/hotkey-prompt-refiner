@@ -1,14 +1,18 @@
 mod anthropic;
 mod clipboard;
 mod config;
+mod hotkey;
 mod paste;
 mod workflow;
 
 use config::Config;
+use hotkey::HotkeyManager;
 use workflow::execute_workflow_with_logging;
+use std::sync::Arc;
+use tao::event_loop::{ControlFlow, EventLoopBuilder};
+use global_hotkey::{GlobalHotKeyEvent, HotKeyState};
 
-#[tokio::main]
-async fn main() {
+fn main() {
     // Load environment variables from .env file if present
     dotenv::dotenv().ok();
 
@@ -38,58 +42,80 @@ async fn main() {
     println!("✓ Configuration validated");
 
     // Create API client
-    let api_client = anthropic::ApiClient::new(config.api_key.clone(), None);
+    let api_client = Arc::new(anthropic::ApiClient::new(config.api_key.clone(), None));
+    let config = Arc::new(config);
 
-    // Test 1: Basic API connection
-    println!("\n🔬 Test 1: Basic API connection...");
-    match anthropic::send_message(
-        &config.api_key,
-        "Say 'Hello! API connection successful.' in 5 words or less.",
-        anthropic::DEFAULT_MODEL,
-        100,
-    ).await {
-        Ok(response) => {
-            println!("✓ API test successful!");
-            println!("  Model: {}", anthropic::DEFAULT_MODEL);
-            println!("  Response: {}", response.trim());
+    // Initialize hotkey manager
+    let hotkey_manager = match HotkeyManager::new() {
+        Ok(manager) => {
+            println!("✓ Hotkey manager initialized");
+            manager
         }
         Err(e) => {
-            eprintln!("✗ API test failed: {}", e);
-            eprintln!("  Check your API key and network connection");
+            eprintln!("✗ Failed to create hotkey manager: {}", e);
+            std::process::exit(1);
         }
+    };
+
+    // Register hotkey
+    if let Err(e) = hotkey_manager.register() {
+        eprintln!("✗ Failed to register hotkey: {}", e);
+        eprintln!("  The hotkey might be in use by another application.");
+        std::process::exit(1);
     }
+    println!("✓ Hotkey registered: {}", hotkey_manager.hotkey_description());
 
-    // Test 2: Prompt formatting and processing
-    println!("\n🔬 Test 2: Prompt formatting with template...");
-    let test_clipboard = "make this text better";
-    match api_client.process_text(&config.prompt_template, test_clipboard).await {
-        Ok(response) => {
-            println!("✓ Prompt formatting test successful!");
-            println!("  Input: {}", test_clipboard);
-            println!("  Output: {}", response.trim());
+    #[cfg(target_os = "macos")]
+    println!("\n✅ System ready! Press Cmd+Shift+] to process clipboard text.\n");
+
+    #[cfg(not(target_os = "macos"))]
+    println!("\n✅ System ready! Press Ctrl+Shift+] to process clipboard text.\n");
+
+    // Create shared tokio runtime in a separate thread
+    let (workflow_tx, workflow_rx) = std::sync::mpsc::channel::<()>();
+
+    let config_clone = Arc::clone(&config);
+    let api_client_clone = Arc::clone(&api_client);
+
+    std::thread::spawn(move || {
+        let rt = tokio::runtime::Runtime::new().expect("Failed to create tokio runtime");
+
+        while workflow_rx.recv().is_ok() {
+            let config = Arc::clone(&config_clone);
+            let api_client = Arc::clone(&api_client_clone);
+
+            rt.block_on(async {
+                match execute_workflow_with_logging(&config, &api_client).await {
+                    Ok(()) => {
+                        println!("✅ Workflow completed successfully!\n");
+                    }
+                    Err(e) => {
+                        eprintln!("❌ Workflow failed: {}\n", e);
+                    }
+                }
+                println!("Ready for next hotkey press...");
+            });
         }
-        Err(e) => {
-            eprintln!("✗ Prompt formatting test failed: {}", e);
+    });
+
+    // Create tao event loop (required for macOS global hotkeys)
+    let event_loop = EventLoopBuilder::new().build();
+
+    // Get global hotkey event receiver
+    let global_hotkey_channel = GlobalHotKeyEvent::receiver();
+
+    // Run tao event loop on main thread
+    event_loop.run(move |_event, _, control_flow| {
+        *control_flow = ControlFlow::Poll;
+
+        if let Ok(event) = global_hotkey_channel.try_recv() {
+            // Only trigger on key press, not release
+            if event.state == HotKeyState::Pressed {
+                println!("\n⌨️  Hotkey pressed! Executing workflow...");
+
+                // Send signal to workflow thread
+                let _ = workflow_tx.send(());
+            }
         }
-    }
-
-    println!("\n✅ All tests passed! Ready for workflow testing.");
-
-    // Test 3: Full workflow (if clipboard has content)
-    println!("\n🔬 Test 3: Complete workflow...");
-    println!("   Copy some text to clipboard and the workflow will process it.");
-    println!("   (Or skip if clipboard is empty)");
-
-    match execute_workflow_with_logging(&config, &api_client).await {
-        Ok(()) => {
-            println!("   ✓ Workflow test successful!");
-        }
-        Err(e) => {
-            println!("   ⚠ Workflow test skipped or failed: {}", e);
-            println!("   This is normal if clipboard was empty.");
-        }
-    }
-
-    println!("\n✅ All systems operational!");
-    println!("Ready! Hotkey: Cmd+Shift+P (not yet implemented)");
+    });
 }
