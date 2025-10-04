@@ -47,7 +47,10 @@
       "Bash(for i in {1..11})",
       "Bash(do echo \"=== Issue #$i ===\")",
       "Bash(done)",
-      "Bash(for:*)"
+      "Bash(for:*)",
+      "Bash(curl:*)",
+      "Bash(sh:*)",
+      "Bash(source:*)"
     ]
   },
   "enableAllProjectMcpServers": false
