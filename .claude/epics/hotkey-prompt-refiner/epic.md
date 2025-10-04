@@ -4,7 +4,7 @@ status: backlog
 created: 2025-10-04T15:47:12Z
 progress: 0%
 prd: .claude/prds/hotkey-prompt-refiner.md
-github: [Will be updated when synced to GitHub]
+github: https://github.com/tandelov/hotkey-prompt-refiner/issues/1
 ---
 
 # Epic: Hotkey Prompt Refiner
@@ -185,18 +185,18 @@ High-level task categories that will be created:
 4. macOS Accessibility permission detection and guidance
 
 ## Tasks Created
-- [ ] 001.md - Project Setup and Dependencies (parallel: false, size: S, 2-4h)
-- [ ] 002.md - Global Hotkey System (parallel: false, size: M, 6-8h)
-- [ ] 003.md - Clipboard Integration (parallel: true, size: S, 3-4h)
-- [ ] 004.md - Configuration System (parallel: true, size: S, 3-4h)
-- [ ] 005.md - API Integration with allm (parallel: false, size: M, 6-8h)
-- [ ] 006.md - Auto-paste System (parallel: true, size: M, 6-8h)
-- [ ] 007.md - Integrate Complete Workflow (parallel: false, size: M, 4-6h)
-- [ ] 008.md - Cross-platform Testing and Refinement (parallel: false, size: L, 8-12h)
-- [ ] 009.md - Performance Optimization (parallel: true, size: M, 6-8h)
-- [ ] 010.md - Documentation and User Guide (parallel: true, size: S, 4-6h)
+- [ ] #8 - Project Setup and Dependencies (parallel: false)
+- [ ] #9 - Global Hotkey System (parallel: false)
+- [ ] #10 - Clipboard Integration (parallel: true)
+- [ ] #11 - Configuration System (parallel: true)
+- [ ] #2 - API Integration with allm (parallel: false)
+- [ ] #3 - Auto-paste System (parallel: true)
+- [ ] #4 - Integrate Complete Workflow (parallel: false)
+- [ ] #5 - Cross-platform Testing and Refinement (parallel: false)
+- [ ] #6 - Performance Optimization (parallel: true)
+- [ ] #7 - Documentation and User Guide (parallel: true)
 
-**Total tasks:** 10
-**Parallel-capable tasks:** 5 (003, 004, 006, 009, 010)
-**Sequential tasks:** 5 (001, 002, 005, 007, 008)
-**Estimated total effort:** 49-68 hours (~1.5-2 weeks)
+Total tasks: 10
+Parallel tasks: 5
+Sequential tasks: 5
+Estimated total effort: 49-68 hours (~1.5-2 weeks)
