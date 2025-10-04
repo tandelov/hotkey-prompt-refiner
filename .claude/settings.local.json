@@ -48,7 +48,8 @@
       "Bash(do echo \"=== Issue #$i ===\")",
       "Bash(done)",
       "Bash(for:*)",
-      "Bash(ANTHROPIC_API_KEY=\"sk-test-key-12345\" ./target/debug/hotkey-prompt-refiner)"
+      "Bash(ANTHROPIC_API_KEY=\"sk-test-key-12345\" ./target/debug/hotkey-prompt-refiner)",
+      "Bash(./target/debug/hotkey-prompt-refiner)"
     ]
   },
   "enableAllProjectMcpServers": false

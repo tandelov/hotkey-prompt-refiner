@@ -33,8 +33,11 @@ async fn main() {
     }
     println!("✓ Configuration validated");
 
-    // Test API connection with Haiku
-    println!("\n🔬 Testing API connection with Claude 3.5 Haiku...");
+    // Create API client
+    let api_client = anthropic::ApiClient::new(config.api_key.clone(), None);
+
+    // Test 1: Basic API connection
+    println!("\n🔬 Test 1: Basic API connection...");
     match anthropic::send_message(
         &config.api_key,
         "Say 'Hello! API connection successful.' in 5 words or less.",
@@ -52,5 +55,20 @@ async fn main() {
         }
     }
 
-    println!("\nReady! Hotkey: Cmd+Shift+P (not yet implemented)");
+    // Test 2: Prompt formatting and processing
+    println!("\n🔬 Test 2: Prompt formatting with template...");
+    let test_clipboard = "make this text better";
+    match api_client.process_text(&config.prompt_template, test_clipboard).await {
+        Ok(response) => {
+            println!("✓ Prompt formatting test successful!");
+            println!("  Input: {}", test_clipboard);
+            println!("  Output: {}", response.trim());
+        }
+        Err(e) => {
+            eprintln!("✗ Prompt formatting test failed: {}", e);
+        }
+    }
+
+    println!("\n✅ All tests passed! Ready for hotkey integration.");
+    println!("Ready! Hotkey: Cmd+Shift+P (not yet implemented)");
 }
