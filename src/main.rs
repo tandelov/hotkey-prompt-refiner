@@ -1,4 +1,7 @@
 mod anthropic;
+mod config;
+
+use config::Config;
 
 #[tokio::main]
 async fn main() {
@@ -6,13 +9,48 @@ async fn main() {
     dotenv::dotenv().ok();
 
     println!("Hotkey Prompt Refiner v{}", env!("CARGO_PKG_VERSION"));
-    println!("Starting up...");
+    println!("Starting up...\n");
 
-    // Verify API key is configured
-    match std::env::var("ANTHROPIC_API_KEY") {
-        Ok(_) => println!("✓ API key configured"),
-        Err(_) => println!("⚠ Warning: ANTHROPIC_API_KEY not set"),
+    // Load configuration
+    let config = match Config::load() {
+        Ok(cfg) => {
+            println!("✓ Configuration loaded successfully");
+            cfg
+        }
+        Err(e) => {
+            eprintln!("✗ Configuration error: {}", e);
+            eprintln!("\nPlease ensure:");
+            eprintln!("  1. ANTHROPIC_API_KEY is set in environment or .env file");
+            eprintln!("  2. Get your API key from: https://console.anthropic.com/settings/keys");
+            std::process::exit(1);
+        }
+    };
+
+    // Validate configuration
+    if let Err(e) = config.validate() {
+        eprintln!("✗ Configuration validation failed: {}", e);
+        std::process::exit(1);
+    }
+    println!("✓ Configuration validated");
+
+    // Test API connection with Haiku
+    println!("\n🔬 Testing API connection with Claude 3.5 Haiku...");
+    match anthropic::send_message(
+        &config.api_key,
+        "Say 'Hello! API connection successful.' in 5 words or less.",
+        anthropic::DEFAULT_MODEL,
+        100,
+    ).await {
+        Ok(response) => {
+            println!("✓ API test successful!");
+            println!("  Model: {}", anthropic::DEFAULT_MODEL);
+            println!("  Response: {}", response.trim());
+        }
+        Err(e) => {
+            eprintln!("✗ API test failed: {}", e);
+            eprintln!("  Check your API key and network connection");
+        }
     }
 
-    println!("Ready!");
+    println!("\nReady! Hotkey: Cmd+Shift+P (not yet implemented)");
 }

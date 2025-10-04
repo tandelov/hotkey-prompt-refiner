@@ -12,6 +12,9 @@ use std::error::Error;
 const API_ENDPOINT: &str = "https://api.anthropic.com/v1/messages";
 const API_VERSION: &str = "2023-06-01";
 
+/// Default model for testing (Claude 3.5 Haiku - fast and cost-effective)
+pub const DEFAULT_MODEL: &str = "claude-3-5-haiku-20241022";
+
 #[derive(Debug, Serialize)]
 struct Message {
     role: String,
@@ -48,7 +51,7 @@ struct ApiResponse {
 /// # Arguments
 /// * `api_key` - Anthropic API key
 /// * `user_message` - The message to send to Claude
-/// * `model` - Model name (e.g., "claude-sonnet-4-5")
+/// * `model` - Model name (e.g., "claude-3-5-haiku-20241022" or use DEFAULT_MODEL)
 /// * `max_tokens` - Maximum tokens in response
 ///
 /// # Returns
@@ -102,7 +105,7 @@ mod tests {
     #[tokio::test]
     async fn test_api_request_structure() {
         let request = ApiRequest {
-            model: "claude-sonnet-4-5".to_string(),
+            model: DEFAULT_MODEL.to_string(),
             max_tokens: 1024,
             messages: vec![Message {
                 role: "user".to_string(),
@@ -111,7 +114,7 @@ mod tests {
         };
 
         let json = serde_json::to_string(&request).unwrap();
-        assert!(json.contains("claude-sonnet-4-5"));
+        assert!(json.contains("claude-3-5-haiku"));
         assert!(json.contains("Hello"));
     }
 }
