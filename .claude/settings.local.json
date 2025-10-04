@@ -42,7 +42,12 @@
       "WebSearch",
       "Bash(test:*)",
       "SlashCommand(/pm:epic-sync hotkey-prompt-refiner)",
-      "SlashCommand(/pm:epic-start:*)"
+      "SlashCommand(/pm:epic-start:*)",
+      "WebFetch(domain:crates.io)",
+      "Bash(for i in {1..11})",
+      "Bash(do echo \"=== Issue #$i ===\")",
+      "Bash(done)",
+      "Bash(for:*)"
     ]
   },
   "enableAllProjectMcpServers": false

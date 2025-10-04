@@ -21,7 +21,7 @@ Build a lightweight, cross-platform Rust desktop application that runs as a back
 **Key Technical Choices:**
 - **Global Hotkey**: Use `global-hotkey` crate for cross-platform hotkey registration
 - **Clipboard**: Use `arboard` crate for clipboard access
-- **API Client**: Use `allm` library for Anthropic Claude API integration
+- **API Client**: Direct HTTP communication with Anthropic API using `reqwest` and `serde_json` (no SDK crates for minimal binary size)
 - **Auto-paste**: Platform-specific implementations using `enigo` crate for keyboard simulation
 - **Config Management**: Use `dotenv` for API key, separate config file for prompt templates
 - **Threading Model**: Main thread for macOS hotkey event loop, async runtime for API calls
@@ -50,9 +50,10 @@ Build a lightweight, cross-platform Rust desktop application that runs as a back
 - Format for Claude API
 
 **4. API Client Integration**
-- Use `allm` library for Claude API communication
-- Handle authentication via environment variable
-- Stream or buffer response
+- Direct HTTP requests to Anthropic API using `reqwest`
+- JSON serialization/deserialization with `serde_json`
+- Handle authentication via `x-api-key` header with API key from environment
+- Stream or buffer response from `/v1/messages` endpoint
 
 **5. Auto-paste System**
 - Simulate keyboard input to paste response at cursor
@@ -82,7 +83,7 @@ Build a lightweight, cross-platform Rust desktop application that runs as a back
 
 **Security:**
 - API key never hardcoded in source
-- HTTPS enforced by `allm` library
+- HTTPS enforced by `reqwest` (API endpoint: `https://api.anthropic.com/v1/messages`)
 - No local storage of clipboard content or API responses
 
 ## Implementation Strategy
@@ -90,7 +91,7 @@ Build a lightweight, cross-platform Rust desktop application that runs as a back
 **Phase 1: Core Workflow (macOS)**
 1. Set up Rust project with minimal dependencies
 2. Implement hotkey registration and clipboard capture
-3. Integrate `allm` for Claude API calls
+3. Implement direct HTTP API integration with `reqwest` and `serde_json` for Claude API calls
 4. Implement auto-paste with keyboard simulation
 5. Add configuration loading and validation
 
@@ -119,7 +120,7 @@ High-level task categories that will be created:
 - [ ] **Project Setup**: Initialize Cargo project, configure dependencies, set up development environment
 - [ ] **Global Hotkey System**: Implement cross-platform hotkey registration with macOS main thread handling
 - [ ] **Clipboard Integration**: Implement clipboard text capture on hotkey activation
-- [ ] **API Integration**: Integrate `allm` library, implement prompt templating and API communication
+- [ ] **API Integration**: Implement direct HTTP API communication with `reqwest` and `serde_json`, prompt templating and API calls to Anthropic `/v1/messages` endpoint
 - [ ] **Auto-paste System**: Implement keyboard simulation for response insertion at cursor
 - [ ] **Configuration & Security**: Implement config loading, API key management, and macOS permission detection
 - [ ] **Cross-platform Testing**: Test and refine Windows/Linux support
@@ -135,7 +136,8 @@ High-level task categories that will be created:
 **Rust Crates:**
 - `global-hotkey`: System-wide hotkey registration
 - `arboard`: Clipboard access
-- `allm`: Anthropic API client
+- `reqwest`: HTTP client for direct Anthropic API communication
+- `serde_json`: JSON serialization/deserialization for API requests/responses
 - `enigo`: Keyboard simulation for auto-paste
 - `dotenv`: Environment variable management
 - `tokio`: Async runtime for API calls
@@ -189,7 +191,7 @@ High-level task categories that will be created:
 - [ ] #9 - Global Hotkey System (parallel: false)
 - [ ] #10 - Clipboard Integration (parallel: true)
 - [ ] #11 - Configuration System (parallel: true)
-- [ ] #2 - API Integration with allm (parallel: false)
+- [ ] #2 - Direct HTTP API Integration (parallel: false)
 - [ ] #3 - Auto-paste System (parallel: true)
 - [ ] #4 - Integrate Complete Workflow (parallel: false)
 - [ ] #5 - Cross-platform Testing and Refinement (parallel: false)

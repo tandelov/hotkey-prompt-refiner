@@ -16,7 +16,7 @@ Hotkey Prompt Refiner is a lightweight, cross-platform desktop application (Rust
 
 2. **Clipboard Handler**: Captures and manages clipboard text content
 
-3. **API Integration**: Uses the `allm` library for Anthropic Claude API communication
+3. **API Integration**: Direct HTTP communication with Anthropic Claude API using `reqwest` and `serde_json`
 
 4. **Prompt Formatting**: Template-based prompt construction with clipboard text
 
@@ -26,6 +26,29 @@ Hotkey Prompt Refiner is a lightweight, cross-platform desktop application (Rust
 
 - **macOS (Primary)**: Hotkey event loop must run on main thread; requires Accessibility permissions detection
 - **Windows/Linux (Secondary)**: Standard cross-platform hotkey handling
+
+### API Implementation Guidelines
+
+**CRITICAL: DO NOT use any Anthropic API crates (anthropic-sdk, claude-api, etc.)**
+
+This project implements direct HTTP communication with the Anthropic API using ONLY:
+- `reqwest` - For HTTP requests
+- `serde_json` - For JSON serialization/deserialization
+
+**Rationale:**
+- Minimal dependencies = smaller binary size
+- Direct control over API requests
+- No vendor lock-in to SDK versions
+- Meets performance requirements
+
+**API Module:** All Anthropic API communication is handled in `src/anthropic.rs`
+
+**Endpoint:** `https://api.anthropic.com/v1/messages`
+
+**Required Headers:**
+- `x-api-key`: API key from environment
+- `anthropic-version`: `2023-06-01`
+- `content-type`: `application/json`
 
 ## Development Commands
 
