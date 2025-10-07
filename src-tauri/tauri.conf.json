@@ -1,0 +1,71 @@
+{
+  "$schema": "https://schema.tauri.app/config/2",
+  "productName": "Hotkey Prompt Refiner",
+  "version": "0.1.0",
+  "identifier": "com.hotkey-prompt-refiner.app",
+  "build": {
+    "beforeDevCommand": "npm run dev",
+    "devUrl": "http://localhost:1420",
+    "beforeBuildCommand": "npm run build",
+    "frontendDist": "../build"
+  },
+  "app": {
+    "windows": [
+      {
+        "title": "Hotkey Prompt Refiner",
+        "width": 900,
+        "height": 700,
+        "resizable": true,
+        "center": true,
+        "skipTaskbar": false,
+        "visible": true
+      }
+    ],
+    "security": {
+      "csp": null
+    },
+    "macOSPrivateApi": true,
+    "trayIcon": {
+      "id": "main",
+      "iconPath": "icons/icon.png",
+      "iconAsTemplate": true,
+      "menuOnLeftClick": false,
+      "tooltip": "Hotkey Prompt Refiner"
+    }
+  },
+  "bundle": {
+    "active": true,
+    "targets": ["dmg", "app", "deb", "appimage"],
+    "icon": [
+      "icons/32x32.png",
+      "icons/128x128.png",
+      "icons/128x128@2x.png",
+      "icons/icon.icns",
+      "icons/icon.ico"
+    ],
+    "category": "Productivity",
+    "shortDescription": "AI-powered text processing via global hotkeys",
+    "longDescription": "Hotkey Prompt Refiner enables AI-powered text transformation using global keyboard shortcuts. Copy text, press your custom hotkey, and the app automatically processes it with Claude AI and pastes the result.",
+    "macOS": {
+      "minimumSystemVersion": "10.15",
+      "entitlements": null,
+      "exceptionDomain": "",
+      "frameworks": [],
+      "providerShortName": null,
+      "signingIdentity": null
+    },
+    "linux": {
+      "deb": {
+        "depends": [],
+        "section": "utils"
+      },
+      "appimage": {
+        "bundleMediaFramework": false,
+        "files": {}
+      }
+    },
+    "resources": [],
+    "copyright": "Copyright © 2025. All rights reserved.",
+    "licenseFile": null
+  }
+}

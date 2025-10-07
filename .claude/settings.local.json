@@ -53,7 +53,16 @@
       "Bash(source:*)",
       "Bash(ANTHROPIC_API_KEY=\"sk-test-key-12345\" ./target/debug/hotkey-prompt-refiner)",
       "Bash(./target/debug/hotkey-prompt-refiner)",
-      "Bash(pbcopy)"
+      "Bash(pbcopy)",
+      "Bash(tee:*)",
+      "Bash(epic_number=12)",
+      "Bash(echo \"Epic issue number: $epic_number\")",
+      "Read(//tmp/**)",
+      "Read(//root/**)",
+      "Bash(timeout 60 cargo check)",
+      "Bash(timeout 30 cargo check --message-format=short)",
+      "Bash(timeout 60 cargo check --manifest-path /root/hotkey-prompt-refiner/src-tauri/Cargo.toml)",
+      "Bash(timeout 30 cargo check --manifest-path /root/hotkey-prompt-refiner/src-tauri/Cargo.toml --message-format=short)"
     ]
   },
   "enableAllProjectMcpServers": false

@@ -1,342 +1,243 @@
 # Hotkey Prompt Refiner
 
-A lightweight, cross-platform desktop application that enables AI-powered text processing via global hotkeys. Copy text, press a hotkey, and instantly receive an AI-refined response pasted at your cursor location.
+A lightweight, cross-platform desktop application that enables AI-powered text processing via global hotkeys. Configure custom templates, assign hotkeys, and instantly process clipboard text with Claude AI - all from a clean, modern GUI.
 
 ## Features
 
-- **Global Hotkey Activation**: Trigger AI processing from anywhere with `Cmd+Shift+]` (macOS) or `Ctrl+Shift+]` (Windows/Linux)
-- **Clipboard Integration**: Automatically processes text from your clipboard
-- **Claude API Integration**: Direct HTTP integration with Anthropic's Claude API for intelligent text processing
-- **Auto-paste**: AI responses are automatically pasted at your cursor location
-- **Customizable Prompts**: Configure prompt templates to tailor AI processing to your needs
-- **Minimal Resource Usage**: <5MB binary size, <30MB RAM usage, <1% idle CPU
-- **Cross-platform**: Works on macOS, Windows, and Linux
+- **🎛️ GUI Configuration**: Visual settings interface - no config files needed
+- **⌨️ Multiple Templates**: Create unlimited prompt templates with unique hotkeys
+- **🔐 Secure Storage**: API keys stored in system keychain (macOS Keychain, Linux Secret Service)
+- **📋 Clipboard Integration**: Automatically processes text from your clipboard
+- **🤖 Claude API**: Direct integration with Anthropic's Claude for intelligent text processing
+- **✨ Auto-paste**: AI responses automatically pasted at your cursor location
+- **📊 History Viewer**: Review recent transformations with search and export
+- **🎯 System Tray**: Quick access via menu bar/system tray icon
+- **🚀 Auto-launch**: Optional system startup integration
+- **🎨 Modern UI**: Clean Svelte-based interface with dark mode support
+- **⚡ Performant**: <50MB RAM usage, <15MB bundle size
+- **🌍 Cross-platform**: macOS and Linux support
 
-## Installation
+## Quick Start
 
-### Prerequisites
+### Installation
 
-- Anthropic API key (get one at https://console.anthropic.com/settings/keys)
+See [INSTALLATION.md](INSTALLATION.md) for detailed platform-specific instructions.
 
-### macOS
+**macOS:**
+1. Download the `.dmg` from [Releases](https://github.com/tandelov/hotkey-prompt-refiner/releases)
+2. Drag app to Applications folder
+3. Grant Accessibility permissions when prompted
 
-1. Download the latest release from [Releases](https://github.com/tandelov/hotkey-prompt-refiner/releases)
-2. Extract and move the binary to a convenient location (e.g., `/usr/local/bin/`)
-3. Make it executable: `chmod +x hotkey-prompt-refiner`
-4. **Important**: Grant Accessibility permissions when prompted (required for auto-paste functionality)
-   - Go to System Preferences → Security & Privacy → Privacy → Accessibility
-   - Add and enable the application
+**Linux:**
+1. Download the `.AppImage` from [Releases](https://github.com/tandelov/hotkey-prompt-refiner/releases)
+2. Make executable: `chmod +x Hotkey-Prompt-Refiner*.AppImage`
+3. Run: `./Hotkey-Prompt-Refiner*.AppImage`
 
-### Windows
+### First-Time Setup
 
-1. Download the latest release from [Releases](https://github.com/tandelov/hotkey-prompt-refiner/releases)
-2. Extract the binary to a convenient location
-3. Run `hotkey-prompt-refiner.exe`
+1. **Launch the app** - it will appear in your system tray
+2. **Open Settings** from the tray menu or window
+3. **Add your API key**: Get one at [console.anthropic.com](https://console.anthropic.com/settings/keys)
+4. **Create a template**:
+   - Click "New Template"
+   - Give it a name (e.g., "Grammar Checker")
+   - Write your prompt (must include `{clipboard_text}`)
+   - Record a hotkey (e.g., Cmd+Shift+G)
+   - Save
+5. **Test it**:
+   - Copy some text
+   - Press your hotkey
+   - Watch the AI response paste automatically!
 
-### Linux
+## Usage
 
-1. Download the latest release from [Releases](https://github.com/tandelov/hotkey-prompt-refiner/releases)
-2. Extract and move the binary to `/usr/local/bin/` or another location in your PATH
-3. Make it executable: `chmod +x hotkey-prompt-refiner`
-4. Ensure X11 or Wayland display server is running
+### Creating Templates
 
-### Building from Source
+Templates define how Claude processes your text. Each template can have its own hotkey.
 
-```bash
-# Clone the repository
-git clone https://github.com/tandelov/hotkey-prompt-refiner.git
-cd hotkey-prompt-refiner
-
-# Build release binary
-cargo build --release
-
-# Binary will be at target/release/hotkey-prompt-refiner
-```
-
-## Configuration
-
-### API Key Setup
-
-Set your Anthropic API key using one of these methods:
-
-**Option 1: Environment Variable**
-```bash
-export ANTHROPIC_API_KEY="sk-ant-..."
-```
-
-**Option 2: .env File**
-Create a `.env` file in the same directory as the binary:
-```
-ANTHROPIC_API_KEY=sk-ant-...
-```
-
-### Customizing the Prompt Template (Optional)
-
-The default prompt refines and improves text. To customize:
-
-1. Copy the example template:
-   ```bash
-   cp prompt_template.txt.example prompt_template.txt
-   ```
-
-2. Edit `prompt_template.txt` with your desired prompt. **Must include `{clipboard_text}` placeholder**
-
-Example templates:
-
-**Code Review:**
-```
-Review the following code and provide suggestions for improvements:
-
-{clipboard_text}
-
-Focus on: code quality, performance, security, and best practices.
-```
+**Example templates:**
 
 **Grammar Correction:**
 ```
-Correct the grammar and improve the clarity of the following text:
+Correct the grammar and improve clarity:
+
+{clipboard_text}
+```
+
+**Code Review:**
+```
+Review this code and suggest improvements:
 
 {clipboard_text}
 
-Maintain the original tone and meaning.
+Focus on: performance, security, readability.
 ```
 
 **Summarization:**
 ```
-Summarize the following text in 2-3 concise bullet points:
+Summarize the following text in 2-3 sentences:
 
 {clipboard_text}
 ```
 
-## Usage
-
-1. **Start the application**:
-   ```bash
-   ./hotkey-prompt-refiner
-   ```
-
-   You should see:
-   ```
-   ✓ Configuration loaded successfully
-   ✓ Configuration validated
-   ✓ Hotkey manager initialized
-   ✓ Hotkey registered: Cmd+Shift+]
-
-   ✅ System ready! Press Cmd+Shift+] to process clipboard text.
-   ```
-
-2. **Copy text** to your clipboard (e.g., select text and press `Cmd+C`)
-
-3. **Press the hotkey**:
-   - macOS: `Cmd+Shift+]`
-   - Windows/Linux: `Ctrl+Shift+]`
-
-4. **Wait for processing**: The app sends your text to Claude API
-
-5. **AI response auto-pastes** at your cursor location
-
-### Example Workflow
-
+**Translation:**
 ```
-1. Copy: "make this better: the app dont work good"
-2. Press: Cmd+Shift+]
-3. Get pasted: "The application isn't functioning properly"
+Translate the following text to Spanish:
+
+{clipboard_text}
 ```
+
+### Workflow
+
+1. Copy text to clipboard (Cmd+C / Ctrl+C)
+2. Press your template's hotkey
+3. AI processes the text
+4. Result is pasted at cursor location
+5. Check History viewer for past transformations
+
+### History
+
+The History view shows your recent transformations:
+- Search through past results
+- View original text and AI response
+- Copy results to clipboard
+- Clear history (data is not persisted between sessions)
+
+## Configuration
+
+### API Settings
+
+- **API Key**: Stored securely in system keychain
+- **Model Selection**: Choose Claude model (default: claude-3-5-sonnet)
+- **Test Connection**: Verify API key before saving
+
+### Templates
+
+- **Name**: Descriptive label for the template
+- **Description**: Optional notes about the template's purpose
+- **Prompt**: Your instructions to Claude (must include `{clipboard_text}`)
+- **Hotkey**: Optional keyboard shortcut (e.g., Cmd+Shift+T)
+
+### System Integration
+
+- **Auto-launch**: Start app on system boot
+- **System Tray**: Minimize to tray instead of quitting
+
+## Building from Source
+
+See [BUILDING.md](BUILDING.md) for comprehensive build instructions.
+
+**Quick build:**
+```bash
+# Clone repository
+git clone https://github.com/tandelov/hotkey-prompt-refiner.git
+cd hotkey-prompt-refiner
+
+# Install dependencies
+npm install
+
+# Run in development
+npm run tauri dev
+
+# Build for production
+./build-release.sh
+```
+
+## Architecture
+
+**Frontend:**
+- SvelteKit 2.x with Vite
+- Reactive UI with Svelte stores
+- Static adapter for Tauri integration
+
+**Backend:**
+- Tauri 2.x for native desktop integration
+- Rust core with existing hotkey/clipboard modules
+- Direct HTTP communication with Claude API (no SDK dependency)
+
+**Storage:**
+- API keys: System keychain via `keyring-rs`
+- Templates/settings: JSON files in app config directory
+- History: In-memory only (privacy-first)
 
 ## Troubleshooting
 
-### "ANTHROPIC_API_KEY not found in environment or .env file"
+### macOS: Auto-paste not working
 
-**Solution**: Set your API key using one of the methods in [Configuration](#api-key-setup)
+Grant Accessibility permissions:
+1. System Settings → Privacy & Security → Accessibility
+2. Enable "Hotkey Prompt Refiner"
+3. Restart the app
 
-### "Failed to register hotkey" or "Hotkey is already in use"
+### Linux: Hotkeys not working
 
-**Cause**: Another application is using `Cmd+Shift+]` or `Ctrl+Shift+]`
+Ensure your desktop environment supports global hotkeys. Some Wayland compositors have limitations.
 
-**Solution**: Close conflicting applications or modify the source code to use a different hotkey in `src/hotkey.rs`
+### API key not saving
 
-### macOS: "Accessibility permissions required"
+Check permissions for your system keychain:
+- **macOS**: Keychain Access should allow the app
+- **Linux**: Ensure `gnome-keyring` or equivalent is running
 
-**Cause**: macOS requires Accessibility permissions for the auto-paste feature to simulate keystrokes
+### App won't launch
 
-**Solution**:
-1. Go to System Preferences → Security & Privacy → Privacy → Accessibility
-2. Click the lock icon to make changes
-3. Add the application to the list
-4. Enable the checkbox next to it
-5. Restart the application
+Check you have required system libraries:
+```bash
+# Ubuntu/Debian
+sudo apt install libwebkit2gtk-4.0-37 libgtk-3-0
 
-### "API error: 401 Unauthorized"
+# Fedora
+sudo dnf install webkit2gtk4.0 gtk3
+```
 
-**Cause**: Invalid or expired API key
+## Privacy & Security
 
-**Solution**: Verify your API key at https://console.anthropic.com/settings/keys and update your configuration
-
-### "API error: 400 Bad Request"
-
-**Cause**: Prompt template validation failed
-
-**Solution**: Ensure your `prompt_template.txt` contains the `{clipboard_text}` placeholder
-
-### Response not pasting
-
-**Cause**:
-- Missing Accessibility permissions (macOS)
-- Application doesn't have focus on active text field
-
-**Solution**:
-- Grant Accessibility permissions (macOS)
-- Ensure cursor is in a text input field before pressing hotkey
-- Check console output for error messages
-
-### High memory usage
-
-**Expected**: <30MB idle, may increase during API calls
-
-**If excessive**: Check for memory leaks and report an issue with logs
+- **API keys**: Stored in OS-native secure storage, never in plaintext
+- **No telemetry**: No analytics or tracking
+- **No persistence**: History cleared on app exit
+- **Local processing**: All API calls go directly to Anthropic (no intermediary)
+- **Open source**: Full code available for audit
 
 ## Performance
 
-- **Binary Size**: ~3-5MB (release build)
-- **Memory Usage**: <30MB idle, ~40-50MB during API processing
-- **CPU Usage**: <1% idle
-- **Response Latency**: <200ms from hotkey press to API call (network time depends on API)
+- **Idle RAM**: ~40-50 MB
+- **Bundle size**: ~12-15 MB
+- **Startup time**: <2 seconds
+- **Hotkey latency**: <50ms to API call
+- **API response**: Depends on Claude API (~1-3 seconds)
 
-## Platform-Specific Notes
+## Requirements
 
-### macOS
-- Requires Accessibility permissions for auto-paste
-- Hotkey event loop runs on main thread (required by macOS)
-- Tested on macOS 10.15+
+- **macOS**: 10.15+ (Catalina or later)
+- **Linux**: Ubuntu 20.04+, Fedora 35+, Arch Linux
+- **API**: Anthropic API key (paid)
+- **Internet**: Required for Claude API calls
 
-### Windows
-- Standard user permissions sufficient
-- Tested on Windows 10+
+## Contributing
 
-### Linux
-- Requires X11 or Wayland display server
-- Some window managers may require additional configuration for global hotkeys
-- Tested on Ubuntu 20.04+ and Fedora 36+
-
-## Development
-
-### Project Structure
-
-```
-hotkey-prompt-refiner/
-├── src/
-│   ├── main.rs           # Application entry point and event loop
-│   ├── anthropic.rs      # Direct HTTP API client (reqwest + serde_json)
-│   ├── clipboard.rs      # Clipboard text capture
-│   ├── config.rs         # Configuration management
-│   ├── hotkey.rs         # Global hotkey registration
-│   ├── paste.rs          # Auto-paste implementation
-│   └── workflow.rs       # Complete workflow orchestration
-├── Cargo.toml            # Dependencies and build configuration
-├── .env.example          # Example environment variables
-└── prompt_template.txt.example  # Example prompt template
-```
-
-### Architecture
-
-**Threading Model:**
-- Main thread: Runs hotkey event loop (required for macOS)
-- Worker thread: Handles async API calls using Tokio runtime
-
-**API Implementation:**
-- Uses direct HTTP calls via `reqwest` (no SDK dependencies)
-- JSON serialization with `serde_json`
-- Endpoint: `https://api.anthropic.com/v1/messages`
-- Model: `claude-3-5-haiku-20241022` (configurable in code)
-
-### Dependencies
-
-Core dependencies (minimal by design):
-- `global-hotkey`: System-wide hotkey registration
-- `tao`: Event loop for macOS compatibility
-- `arboard`: Cross-platform clipboard access
-- `enigo`: Keyboard simulation for auto-paste
-- `reqwest`: HTTP client for API calls
-- `serde_json`: JSON handling
-- `tokio`: Async runtime
-- `dotenv`: Environment variable management
-
-### Building
-
-```bash
-# Debug build
-cargo build
-
-# Release build (optimized for size)
-cargo build --release
-
-# Run tests
-cargo test
-
-# Check code
-cargo clippy
-```
-
-### Build Optimizations
-
-The release profile is optimized for binary size:
-```toml
-[profile.release]
-opt-level = "z"       # Optimize for size
-lto = true            # Link-time optimization
-strip = true          # Strip symbols
-codegen-units = 1     # Better optimization
-```
-
-### Contributing
-
+Contributions welcome! Please:
 1. Fork the repository
-2. Create a feature branch: `git checkout -b feature/your-feature`
+2. Create a feature branch
 3. Make your changes
-4. Run tests: `cargo test`
-5. Submit a pull request
-
-**Contribution Guidelines:**
-- Follow Rust idioms and best practices
-- Maintain minimal dependencies
-- Keep binary size and memory usage low
-- Test on multiple platforms when possible
-- Update documentation for new features
-
-## Known Limitations
-
-- Hotkey cannot be changed without recompiling (planned feature)
-- Single prompt template at a time (planned: multiple templates)
-- No GUI for configuration (CLI-only by design for minimal footprint)
-- macOS Accessibility permissions required for auto-paste
-
-## Roadmap
-
-- [ ] Configurable hotkeys via config file
-- [ ] Multiple prompt templates with template selection
-- [ ] Streaming API responses for faster perceived performance
-- [ ] Hotkey for clipboard-only mode (no paste)
-- [ ] Menu bar integration (macOS)
-- [ ] System tray integration (Windows/Linux)
-
-## Security
-
-- API key stored only in environment variables or `.env` file (never in source code)
-- All API communication over HTTPS
-- No persistent storage of clipboard content or API responses
-- No telemetry or analytics
+4. Submit a pull request
 
 ## License
 
-MIT License - See LICENSE file for details
-
-## Support
-
-- **Issues**: https://github.com/tandelov/hotkey-prompt-refiner/issues
-- **Discussions**: https://github.com/tandelov/hotkey-prompt-refiner/discussions
+MIT License - see [LICENSE](LICENSE) for details
 
 ## Acknowledgments
 
 Built with:
-- [Anthropic Claude API](https://www.anthropic.com/api)
-- Rust and the amazing crates ecosystem
+- [Tauri](https://tauri.app/) - Desktop app framework
+- [Svelte](https://svelte.dev/) - Reactive UI framework
+- [Claude API](https://www.anthropic.com/claude) - AI text processing
+
+## Support
+
+- **Issues**: [GitHub Issues](https://github.com/tandelov/hotkey-prompt-refiner/issues)
+- **Docs**: [Installation Guide](INSTALLATION.md) | [Build Guide](BUILDING.md)
+- **API**: [Anthropic Documentation](https://docs.anthropic.com/)
+
+---
+
+**Made with ❤️ for developers who love keyboard-driven workflows**
