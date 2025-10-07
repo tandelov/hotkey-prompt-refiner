@@ -1,0 +1,29 @@
+# Prompt Template for Hotkey Prompt Refiner
+#
+# This file defines how clipboard text is sent to Claude API.
+# Copy this file to 'prompt_template.txt' to use a custom template.
+#
+# IMPORTANT: The template MUST contain the {clipboard_text} placeholder
+# which will be replaced with the actual clipboard content.
+
+Refine and improve the following prompt to be more clear, concise, and effective:
+
+{clipboard_text}
+
+Provide only the refined prompt without explanation.
+
+# Alternative templates you can use:
+#
+# For code review:
+# Review the following code and provide suggestions for improvements:
+# {clipboard_text}
+# Focus on: code quality, performance, security, and best practices.
+#
+# For grammar correction:
+# Correct the grammar and improve the clarity of the following text:
+# {clipboard_text}
+# Maintain the original tone and meaning.
+#
+# For summarization:
+# Summarize the following text in 2-3 concise bullet points:
+# {clipboard_text}
