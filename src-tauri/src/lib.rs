@@ -1,15 +1,16 @@
 // Backend modules from original hotkey-prompt-refiner
 mod anthropic;
 mod clipboard;
-mod config;
-mod hotkey;
+// mod config;  // Legacy CLI config - not used in Tauri
+// mod hotkey;  // Legacy CLI hotkey - replaced by hotkey_manager
 mod paste;
-mod workflow;
+// mod workflow;  // Legacy CLI workflow - not used in Tauri
 
 // Tauri configuration system
 mod commands;
 mod models;
 mod hotkey_manager;
+mod migration;
 
 // History storage
 mod lib {
@@ -229,6 +230,9 @@ pub fn run() {
             is_autostart_enabled,
             enable_autostart,
             disable_autostart,
+            migration::check_migration_needed,
+            migration::perform_migration,
+            migration::skip_migration,
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");

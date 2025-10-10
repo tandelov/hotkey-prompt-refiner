@@ -1,0 +1,26 @@
+# Hotkey Prompt Refiner Configuration
+# Edit this file to customize your settings
+
+[hotkey]
+# The modifier keys for the hotkey combination
+# Options: "cmd" (macOS), "ctrl", "alt", "shift"
+# You can combine multiple with + (e.g., "cmd+shift")
+modifiers = "cmd+shift"
+
+# The main key to press
+# Common options: "BracketRight" (]), "KeyP", "KeyK", "Semicolon", "Space"
+# See: https://docs.rs/global-hotkey/latest/global_hotkey/hotkey/enum.Code.html
+key = "BracketRight"
+
+[api]
+# Claude model to use
+# Options: "claude-3-5-haiku-20241022", "claude-3-5-sonnet-20241022", "claude-3-opus-20240229"
+model = "claude-3-5-haiku-20241022"
+
+# API request timeout in seconds
+timeout_seconds = 30
+
+[prompt]
+# Path to your custom prompt template file
+# The template must include {clipboard_text} placeholder
+template_file = "prompt_template.txt"

@@ -63,7 +63,8 @@
       "Bash(timeout 30 cargo check --message-format=short)",
       "Bash(timeout 60 cargo check --manifest-path /root/hotkey-prompt-refiner/src-tauri/Cargo.toml)",
       "Bash(timeout 30 cargo check --manifest-path /root/hotkey-prompt-refiner/src-tauri/Cargo.toml --message-format=short)",
-      "Bash(timeout 60 cargo check --manifest-path /root/hotkey-prompt-refiner/src-tauri/Cargo.toml --message-format=short)"
+      "Bash(timeout 60 cargo check --manifest-path /root/hotkey-prompt-refiner/src-tauri/Cargo.toml --message-format=short)",
+      "Bash(timeout 60 cargo check:*)"
     ]
   },
   "enableAllProjectMcpServers": false
