@@ -13,7 +13,7 @@ A lightweight, cross-platform desktop application that enables AI-powered text p
 - **📊 History Viewer**: Review recent transformations with search and export
 - **🎯 System Tray**: Quick access via menu bar/system tray icon
 - **🚀 Auto-launch**: Optional system startup integration
-- **🎨 Modern UI**: Clean Svelte-based interface with dark mode support
+- **🎨 Native macOS UI**: Authentic macOS design following Human Interface Guidelines with translucent sidebar, system colors, and native controls
 - **⚡ Performant**: <50MB RAM usage, <15MB bundle size
 - **🌍 Cross-platform**: macOS and Linux support
 
@@ -108,7 +108,8 @@ The History view shows your recent transformations:
 ### API Settings
 
 - **API Key**: Stored securely in system keychain
-- **Model Selection**: Choose Claude model (default: claude-3-5-sonnet)
+- **Model Selection**: Choose between Claude Sonnet 4.5 (best performance, good speed) or Haiku 3.5 (good performance, great speed)
+- **Default Model**: Claude Sonnet 4.5 (claude-sonnet-4-5-20250929)
 - **Test Connection**: Verify API key before saving
 
 ### Templates
@@ -123,11 +124,16 @@ The History view shows your recent transformations:
 - **Auto-launch**: Start app on system boot
 - **System Tray**: Minimize to tray instead of quitting
 
-## Building from Source
+## Development
 
-See [BUILDING.md](BUILDING.md) for comprehensive build instructions.
+### Prerequisites
 
-**Quick build:**
+- **Node.js**: 18.x or later
+- **Rust**: 1.70 or later
+- **npm**: 9.x or later
+
+### Setup
+
 ```bash
 # Clone repository
 git clone https://github.com/tandelov/hotkey-prompt-refiner.git
@@ -135,30 +141,114 @@ cd hotkey-prompt-refiner
 
 # Install dependencies
 npm install
+```
 
-# Run in development
+### Development Commands
+
+**Frontend Development (UI only):**
+```bash
+# Start Vite dev server (UI development without Tauri)
+npm run dev
+# Opens at http://localhost:1420
+
+# Build frontend for production
+npm run build
+
+# Preview production build
+npm run preview
+```
+
+**Full Application Development:**
+```bash
+# Run Tauri app in development mode (hot-reload enabled)
 npm run tauri dev
 
-# Build for production
+# Build production app
+npm run tauri build
+
+# Or use the release script for optimized builds
 ./build-release.sh
 ```
+
+**Code Quality:**
+```bash
+# Check SvelteKit project
+npm run check
+
+# Check with watch mode
+npm run check:watch
+
+# Format code
+npm run format
+```
+
+### Project Structure
+
+```
+hotkey-prompt-refiner/
+├── src/                    # SvelteKit frontend
+│   ├── lib/
+│   │   └── components/    # Reusable Svelte components
+│   └── routes/            # SvelteKit pages
+│       ├── +layout.svelte # Root layout with sidebar
+│       ├── settings/      # Settings page
+│       └── history/       # History page
+├── src-tauri/             # Rust backend
+│   ├── src/
+│   │   ├── main.rs       # Entry point
+│   │   ├── lib.rs        # Library with Tauri setup
+│   │   └── commands/     # Tauri command handlers
+│   └── Cargo.toml
+└── package.json
+```
+
+See [BUILDING.md](BUILDING.md) for comprehensive build instructions.
 
 ## Architecture
 
 **Frontend:**
-- SvelteKit 2.x with Vite
-- Reactive UI with Svelte stores
+- SvelteKit 2.x with Vite for fast development
+- Native macOS UI design following Human Interface Guidelines
+- Translucent sidebar with backdrop blur effects
+- System colors (#007AFF blue, #32D74B green, #FF453A red)
+- Lucide SVG icons for clean, modern interface
 - Static adapter for Tauri integration
 
 **Backend:**
 - Tauri 2.x for native desktop integration
-- Rust core with existing hotkey/clipboard modules
+- Transparent titlebar for seamless macOS appearance
+- Rust core with hotkey/clipboard modules
 - Direct HTTP communication with Claude API (no SDK dependency)
+- Global hotkey system with platform-specific implementations
 
 **Storage:**
-- API keys: System keychain via `keyring-rs`
+- API keys: System keychain via `keyring-rs` (macOS Keychain, Linux Secret Service)
 - Templates/settings: JSON files in app config directory
-- History: In-memory only (privacy-first)
+- History: In-memory only (privacy-first, cleared on exit)
+
+## UI Design
+
+The application follows macOS Human Interface Guidelines for an authentic native experience:
+
+**Visual Design:**
+- Overlay titlebar style with hidden title for native macOS appearance
+- Translucent sidebar with `backdrop-filter: blur(20px)`
+- Dark mode optimized with system-standard colors
+- SF Pro font family for typography
+
+**Interactive Elements:**
+- macOS-style toggle switches (44x26px with 22px knob)
+- System blue accent color (#007AFF) for primary actions
+- Translucent backgrounds for secondary buttons
+- 3px focus rings with 0.3 opacity for accessibility
+
+**Layout:**
+- Fixed-height panels (no scrolling in Settings view)
+- Sidebar navigation (200px width)
+- Master-detail layout for History
+- 28px titlebar height with traffic light spacing
+
+See `ui-advice.md` for detailed design specifications.
 
 ## Troubleshooting
 
