@@ -151,32 +151,42 @@
     <div class="section section-grow">
       <div class="section-header">
         <h2>Templates</h2>
-        <button class="btn-add" onclick={openNewTemplate}>+</button>
       </div>
 
-      {#if templates.length === 0}
-        <div class="empty-templates">
-          <p>No templates yet</p>
-          <button onclick={openNewTemplate}>Create Template</button>
-        </div>
-      {:else}
-        <div class="templates-scroll">
-          {#each templates as template (template.id)}
-            <div class="template-row">
-              <div class="template-info">
-                <div class="template-name">{template.name}</div>
-                {#if template.hotkey}
-                  <div class="template-hotkey">{template.hotkey}</div>
-                {/if}
+      <div class="templates-container">
+        {#if templates.length === 0}
+          <div class="empty-templates">
+            <p>No templates yet</p>
+            <button onclick={openNewTemplate}>Create Template</button>
+          </div>
+        {:else}
+          <div class="templates-scroll">
+            {#each templates as template (template.id)}
+              <div class="template-row">
+                <div class="template-info">
+                  <div class="template-name">{template.name}</div>
+                  {#if template.hotkey}
+                    <div class="template-hotkey">{template.hotkey}</div>
+                  {/if}
+                </div>
+                <div class="template-actions">
+                  <button class="btn-icon" onclick={() => openEditTemplate(template)} title="Edit">✎</button>
+                  <button class="btn-icon btn-danger" onclick={() => handleDeleteTemplate(template.id)} title="Delete">×</button>
+                </div>
               </div>
-              <div class="template-actions">
-                <button class="btn-icon" onclick={() => openEditTemplate(template)} title="Edit">✎</button>
-                <button class="btn-icon btn-danger" onclick={() => handleDeleteTemplate(template.id)} title="Delete">×</button>
-              </div>
-            </div>
-          {/each}
+            {/each}
+          </div>
+        {/if}
+
+        <div class="list-footer-bar">
+          <button class="btn-add" onclick={openNewTemplate} title="Add Template">
+            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+              <line x1="12" y1="5" x2="12" y2="19"></line>
+              <line x1="5" y1="12" x2="19" y2="12"></line>
+            </svg>
+          </button>
         </div>
-      {/if}
+      </div>
     </div>
   </div>
 </div>
@@ -250,8 +260,10 @@
   }
 
   .form-row {
-    display: flex;
+    display: grid;
+    grid-template-columns: 150px 1fr;
     align-items: center;
+    gap: 16px;
     padding: 10px 0;
     border-bottom: 1px solid rgba(0, 0, 0, 0.08);
   }
@@ -261,40 +273,58 @@
   }
 
   .form-row label {
-    flex: 0 0 140px;
-    font-size: 13px;
+    justify-self: end;
+    font-size: 14px;
     color: #1d1d1f;
   }
 
   .form-row select {
-    flex: 1;
-    padding: 5px 8px;
-    border: 1px solid rgba(0, 0, 0, 0.2);
+    /* Reset default button styles for native appearance */
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    appearance: none;
+
+    /* Layout */
+    padding: 6px 30px 6px 12px;
+
+    /* Visual styling to match NSPopUpButton */
+    background-color: rgba(0, 0, 0, 0.05);
+    background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 12 12"><path fill="%239A9A9A" d="M6 8L2 4h8z"/></svg>');
+    background-repeat: no-repeat;
+    background-position: right 8px center;
+    background-size: 12px;
+    border: 1px solid rgba(0, 0, 0, 0.15);
     border-radius: 6px;
-    background: #ffffff;
-    font-size: 13px;
-    font-family: inherit;
+
+    /* Typography */
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    font-size: 14px;
     color: #1d1d1f;
+
+    /* Interaction */
+    cursor: default;
+    text-align: left;
   }
 
   .form-row select:focus {
     outline: none;
-    border-color: #007aff;
+    border-color: #007AFF;
+    box-shadow: 0 0 0 3px rgba(0, 122, 255, 0.4);
   }
 
   .toggle-row {
-    justify-content: space-between;
+    grid-template-columns: 1fr auto;
+    gap: 12px;
   }
 
   .toggle-label {
-    flex: 1;
     display: flex;
     flex-direction: column;
     gap: 2px;
   }
 
   .toggle-label span:first-child {
-    font-size: 13px;
+    font-size: 14px;
     color: #1d1d1f;
   }
 
@@ -308,14 +338,17 @@
     display: inline-block;
     width: 44px;
     height: 26px;
+    flex-shrink: 0;
   }
 
   .toggle-switch input {
     opacity: 0;
     width: 0;
     height: 0;
+    position: absolute;
   }
 
+  /* macOS-style toggle switch track */
   .slider {
     position: absolute;
     cursor: pointer;
@@ -323,11 +356,12 @@
     left: 0;
     right: 0;
     bottom: 0;
-    background-color: #e0e0e0;
-    transition: background-color 0.2s;
-    border-radius: 16px;
+    background-color: rgba(0, 0, 0, 0.15);
+    transition: background-color 0.2s ease-in-out;
+    border-radius: 13px;
   }
 
+  /* macOS-style toggle switch knob */
   .slider:before {
     position: absolute;
     content: "";
@@ -336,11 +370,12 @@
     left: 2px;
     top: 2px;
     background-color: white;
-    transition: transform 0.2s;
+    transition: transform 0.2s ease-in-out;
     border-radius: 50%;
-    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.15);
   }
 
+  /* "On" state styling */
   .toggle-switch input:checked + .slider {
     background-color: #32D74B;
   }
@@ -349,20 +384,32 @@
     transform: translateX(18px);
   }
 
+  /* Disabled state */
   .toggle-switch input:disabled + .slider {
     opacity: 0.5;
     cursor: not-allowed;
+  }
+
+  .templates-container {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    min-height: 0;
+  }
+
+  .list-footer-bar {
+    padding-top: 8px;
+    border-top: 1px solid rgba(0, 0, 0, 0.1);
+    flex-shrink: 0;
   }
 
   .btn-add {
     width: 24px;
     height: 24px;
     border-radius: 6px;
-    border: none;
-    background: rgba(0, 0, 0, 0.1);
-    color: #1d1d1f;
-    font-size: 18px;
-    line-height: 1;
+    border: 1px solid rgba(0, 0, 0, 0.15);
+    background: transparent;
+    color: #6e6e6e;
     cursor: pointer;
     display: flex;
     align-items: center;
@@ -371,7 +418,12 @@
   }
 
   .btn-add:hover {
-    background: rgba(0, 0, 0, 0.15);
+    background: rgba(0, 0, 0, 0.05);
+  }
+
+  .btn-add svg {
+    width: 14px;
+    height: 14px;
   }
 
   .empty-templates {
@@ -514,9 +566,10 @@
     }
 
     .form-row select {
-      background: rgba(255, 255, 255, 0.1);
-      border-color: rgba(255, 255, 255, 0.2);
-      color: #f5f5f7;
+      background-color: rgba(255, 255, 255, 0.1);
+      background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 12 12"><path fill="%23CFCFCF" d="M6 8L2 4h8z"/></svg>');
+      border-color: rgba(255, 255, 255, 0.15);
+      color: #E0E0E0;
     }
 
     .slider {
@@ -527,13 +580,18 @@
       background-color: #32D74B;
     }
 
+    .list-footer-bar {
+      border-top-color: rgba(255, 255, 255, 0.1);
+    }
+
     .btn-add {
-      background: rgba(255, 255, 255, 0.1);
-      color: #f5f5f7;
+      background: transparent;
+      border-color: rgba(255, 255, 255, 0.15);
+      color: #CFCFCF;
     }
 
     .btn-add:hover {
-      background: rgba(255, 255, 255, 0.15);
+      background: rgba(255, 255, 255, 0.08);
     }
 
     .empty-templates {
