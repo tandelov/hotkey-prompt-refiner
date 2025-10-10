@@ -212,16 +212,18 @@
 
   .api-key-input {
     flex: 1;
-    padding: 0.6rem 1rem;
+    padding: 8px 12px;
     border: 1px solid #ddd;
-    border-radius: 6px;
+    border-radius: 8px;
     font-family: 'Courier New', monospace;
-    font-size: 0.9rem;
+    font-size: 14px;
+    color: #1d1d1f;
   }
 
   .api-key-input:focus {
     outline: none;
-    border-color: #646cff;
+    border-color: #007AFF;
+    box-shadow: 0 0 0 3px rgba(0, 122, 255, 0.3);
   }
 
   .api-key-input:disabled {
@@ -249,9 +251,10 @@
   }
 
   .btn {
-    padding: 0.6rem 1.2rem;
+    padding: 8px 16px;
     border: none;
-    border-radius: 6px;
+    border-radius: 8px;
+    font-size: 14px;
     font-weight: 500;
     cursor: pointer;
     transition: all 0.2s;
@@ -263,31 +266,31 @@
   }
 
   .btn-primary {
-    background: #646cff;
+    background: #007AFF;
     color: white;
   }
 
   .btn-primary:hover:not(:disabled) {
-    background: #535ac8;
+    background: #0051D5;
   }
 
   .btn-secondary {
-    background: #f5f5f5;
-    color: #333;
-    border: 1px solid #ddd;
+    background: rgba(0, 0, 0, 0.08);
+    color: #1d1d1f;
+    border: none;
   }
 
   .btn-secondary:hover:not(:disabled) {
-    background: #e5e5e5;
+    background: rgba(0, 0, 0, 0.12);
   }
 
   .btn-danger {
-    background: #ff4444;
-    color: white;
+    background: transparent;
+    color: #FF453A;
   }
 
   .btn-danger:hover:not(:disabled) {
-    background: #cc0000;
+    background: rgba(255, 69, 58, 0.15);
   }
 
   .message {
@@ -320,33 +323,37 @@
     }
 
     .api-key-input {
-      background: #2a2a2a;
-      border-color: #444;
-      color: #fff;
+      background: rgba(255, 255, 255, 0.1);
+      border: 1px solid rgba(255, 255, 255, 0.15);
+      color: white;
+    }
+
+    .api-key-input:focus {
+      border-color: #007AFF;
+      box-shadow: 0 0 0 3px rgba(0, 122, 255, 0.3);
     }
 
     .api-key-input:disabled {
-      background-color: #1a1a1a;
+      background-color: rgba(255, 255, 255, 0.05);
     }
 
     .toggle-visibility {
-      background: #2a2a2a;
-      border-color: #444;
+      background: rgba(255, 255, 255, 0.1);
+      border-color: rgba(255, 255, 255, 0.15);
       color: #fff;
     }
 
     .toggle-visibility:hover {
-      background: #333;
+      background: rgba(255, 255, 255, 0.15);
     }
 
     .btn-secondary {
-      background: #2a2a2a;
-      color: #fff;
-      border-color: #444;
+      background: rgba(255, 255, 255, 0.15);
+      color: white;
     }
 
     .btn-secondary:hover:not(:disabled) {
-      background: #333;
+      background: rgba(255, 255, 255, 0.2);
     }
   }
 </style>

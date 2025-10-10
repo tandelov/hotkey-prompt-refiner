@@ -2,6 +2,7 @@
   import Sidebar from '$lib/components/Sidebar.svelte';
 </script>
 
+<div class="titlebar" data-tauri-drag-region></div>
 <div class="app-layout">
   <Sidebar />
   <main class="main-content">
@@ -27,11 +28,27 @@
     box-sizing: border-box;
   }
 
+  :root {
+    --titlebar-height: 28px;
+  }
+
+  .titlebar {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: var(--titlebar-height);
+    z-index: 1000;
+    -webkit-app-region: drag;
+    user-select: none;
+  }
+
   .app-layout {
     display: flex;
     height: 100vh;
     width: 100vw;
     overflow: hidden;
+    padding-top: var(--titlebar-height);
   }
 
   .main-content {

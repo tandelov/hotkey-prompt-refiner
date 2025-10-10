@@ -2,17 +2,20 @@
   import { page } from '$app/stores';
 
   const navItems = [
-    { path: '/settings', icon: '⚙️', label: 'Settings' },
-    { path: '/history', icon: '📊', label: 'History' },
+    {
+      path: '/settings',
+      icon: '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"/><circle cx="12" cy="12" r="3"/></svg>',
+      label: 'Settings'
+    },
+    {
+      path: '/history',
+      icon: '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>',
+      label: 'History'
+    },
   ];
 </script>
 
 <aside class="sidebar">
-  <div class="sidebar-header">
-    <div class="app-icon">⌨️</div>
-    <div class="app-name">Hotkey Prompt Refiner</div>
-  </div>
-
   <nav class="sidebar-nav">
     {#each navItems as item}
       <a
@@ -20,7 +23,7 @@
         class="nav-item"
         class:active={$page.url.pathname === item.path}
       >
-        <span class="nav-icon">{item.icon}</span>
+        <span class="nav-icon">{@html item.icon}</span>
         <span class="nav-label">{item.label}</span>
       </a>
     {/each}
@@ -40,27 +43,8 @@
     flex-shrink: 0;
   }
 
-  .sidebar-header {
-    padding: 20px 16px;
-    border-bottom: 1px solid rgba(0, 0, 0, 0.08);
-  }
-
-  .app-icon {
-    font-size: 32px;
-    margin-bottom: 8px;
-    text-align: center;
-  }
-
-  .app-name {
-    font-size: 11px;
-    font-weight: 600;
-    text-align: center;
-    color: #1d1d1f;
-    line-height: 1.3;
-  }
-
   .sidebar-nav {
-    padding: 8px;
+    padding: 12px 8px 8px;
     display: flex;
     flex-direction: column;
     gap: 2px;
@@ -84,15 +68,28 @@
   }
 
   .nav-item.active {
-    background: rgba(0, 122, 255, 0.15);
-    color: #007aff;
+    background: rgba(255, 255, 255, 0.1);
+    color: white;
     font-weight: 500;
   }
 
   .nav-icon {
-    font-size: 16px;
-    width: 20px;
-    text-align: center;
+    width: 16px;
+    height: 16px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-right: 12px;
+    color: #A0A0A0;
+  }
+
+  .nav-icon :global(svg) {
+    width: 16px;
+    height: 16px;
+  }
+
+  .nav-item.active .nav-icon {
+    color: white;
   }
 
   .nav-label {
@@ -101,16 +98,8 @@
 
   @media (prefers-color-scheme: dark) {
     .sidebar {
-      background: rgba(40, 40, 43, 0.9);
+      background: rgba(30, 30, 30, 0.8);
       border-right-color: rgba(255, 255, 255, 0.1);
-    }
-
-    .sidebar-header {
-      border-bottom-color: rgba(255, 255, 255, 0.08);
-    }
-
-    .app-name {
-      color: #f5f5f7;
     }
 
     .nav-item {
@@ -122,8 +111,12 @@
     }
 
     .nav-item.active {
-      background: rgba(10, 132, 255, 0.25);
-      color: #0a84ff;
+      background: rgba(255, 255, 255, 0.1);
+      color: white;
+    }
+
+    .nav-item.active .nav-icon {
+      color: white;
     }
   }
 </style>
