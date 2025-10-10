@@ -4,8 +4,8 @@
   /** @type {any[]} */
   let history = $state([]);
   let searchQuery = $state("");
-  /** @type {string | null} */
-  let expandedId = $state(null);
+  /** @type {any | null} */
+  let selectedEntry = $state(null);
   let loading = $state(true);
 
   async function loadHistory() {
@@ -36,13 +36,14 @@
   }
 
   async function handleClear() {
-    if (!confirm("Are you sure you want to clear all history? This cannot be undone.")) {
+    if (!confirm("Clear all history?")) {
       return;
     }
 
     try {
       await invoke("clear_history");
       history = [];
+      selectedEntry = null;
     } catch (err) {
       console.error("Failed to clear history:", err);
       alert(`Failed to clear history: ${err}`);
@@ -55,18 +56,9 @@
   async function copyToClipboard(text) {
     try {
       await navigator.clipboard.writeText(text);
-      alert("Copied to clipboard!");
     } catch (err) {
       console.error("Failed to copy:", err);
-      alert("Failed to copy to clipboard");
     }
-  }
-
-  /**
-   * @param {string} id
-   */
-  function toggleExpand(id) {
-    expandedId = expandedId === id ? null : id;
   }
 
   /**
@@ -84,7 +76,7 @@
     if (days > 0) return `${days}d ago`;
     if (hours > 0) return `${hours}h ago`;
     if (minutes > 0) return `${minutes}m ago`;
-    return `${seconds}s ago`;
+    return `Just now`;
   }
 
   // Search with debounce
@@ -97,389 +89,339 @@
     }, 300);
   });
 
-  // Load history on mount
   loadHistory();
 </script>
 
-<main class="container">
-  <div class="header">
+<div class="history-page">
+  <div class="page-header">
     <h1>History</h1>
-    <a href="/" class="back-link">← Back to Home</a>
+    <button class="btn-clear" onclick={handleClear} disabled={history.length === 0}>Clear</button>
   </div>
 
-  <p class="subtitle">View your recent prompt processing history (last 100 entries).</p>
+  <div class="content-layout">
+    <div class="list-panel">
+      <div class="search-bar">
+        <input
+          type="text"
+          bind:value={searchQuery}
+          placeholder="Search..."
+          class="search-input"
+        />
+      </div>
 
-  <div class="controls">
-    <input
-      type="text"
-      bind:value={searchQuery}
-      placeholder="Search by template name or content..."
-      class="search-input"
-    />
-    <button onclick={handleClear} disabled={history.length === 0} class="btn btn-danger">
-      Clear All
-    </button>
-  </div>
-
-  {#if loading}
-    <div class="loading">Loading history...</div>
-  {:else if history.length === 0}
-    <div class="empty-state">
-      <p>No history entries yet.</p>
-      <p class="hint">History will appear here after you process text using hotkeys.</p>
-    </div>
-  {:else}
-    <div class="history-list">
-      {#each history as entry (entry.timestamp)}
-        <div class="history-item">
-          <div class="history-header">
-            <div class="history-info">
-              <span class="template-name">{entry.template_name}</span>
-              <span class="timestamp">{formatTime(entry.timestamp)}</span>
-            </div>
+      <div class="history-list">
+        {#if loading}
+          <div class="empty-message">Loading...</div>
+        {:else if history.length === 0}
+          <div class="empty-message">No history</div>
+        {:else}
+          {#each history as entry (entry.timestamp)}
             <button
-              class="expand-btn"
-              onclick={() => toggleExpand(entry.timestamp)}
-              aria-label={expandedId === entry.timestamp ? "Collapse" : "Expand"}
+              class="history-row"
+              class:selected={selectedEntry?.timestamp === entry.timestamp}
+              onclick={() => selectedEntry = entry}
             >
-              {expandedId === entry.timestamp ? "−" : "+"}
+              <div class="row-header">
+                <span class="row-template">{entry.template_name}</span>
+                <span class="row-time">{formatTime(entry.timestamp)}</span>
+              </div>
+              <div class="row-preview">{entry.source_preview}</div>
             </button>
-          </div>
-
-          <div class="preview-section">
-            <div class="preview-item">
-              <span class="preview-label">Input:</span>
-              <span class="preview-text">{entry.source_preview}</span>
-            </div>
-            <div class="preview-item">
-              <span class="preview-label">Output:</span>
-              <span class="preview-text">{entry.result_preview}</span>
-            </div>
-          </div>
-
-          {#if expandedId === entry.timestamp}
-            <div class="expanded-content">
-              <div class="full-content">
-                <div class="content-header">
-                  <strong>Full Input</strong>
-                  <button class="copy-btn" onclick={() => copyToClipboard(entry.full_source)}>
-                    Copy
-                  </button>
-                </div>
-                <pre class="content-text">{entry.full_source}</pre>
-              </div>
-
-              <div class="full-content">
-                <div class="content-header">
-                  <strong>Full Output</strong>
-                  <button class="copy-btn" onclick={() => copyToClipboard(entry.full_result)}>
-                    Copy
-                  </button>
-                </div>
-                <pre class="content-text">{entry.full_result}</pre>
-              </div>
-            </div>
-          {/if}
-        </div>
-      {/each}
+          {/each}
+        {/if}
+      </div>
     </div>
-  {/if}
-</main>
+
+    <div class="detail-panel">
+      {#if selectedEntry}
+        <div class="detail-content">
+          <div class="detail-section">
+            <div class="detail-header">
+              <span class="detail-title">Input</span>
+              <button class="btn-copy" onclick={() => copyToClipboard(selectedEntry.full_source)}>Copy</button>
+            </div>
+            <div class="detail-text">{selectedEntry.full_source}</div>
+          </div>
+
+          <div class="detail-section">
+            <div class="detail-header">
+              <span class="detail-title">Output</span>
+              <button class="btn-copy" onclick={() => copyToClipboard(selectedEntry.full_result)}>Copy</button>
+            </div>
+            <div class="detail-text">{selectedEntry.full_result}</div>
+          </div>
+        </div>
+      {:else}
+        <div class="empty-detail">
+          <span>Select a history entry</span>
+        </div>
+      {/if}
+    </div>
+  </div>
+</div>
 
 <style>
-  .container {
-    padding: 2rem;
-    max-width: 1000px;
-    margin: 0 auto;
-    min-height: 100vh;
+  .history-page {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    overflow: hidden;
   }
 
-  .header {
+  .page-header {
+    padding: 20px 24px 16px;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+    flex-shrink: 0;
     display: flex;
     justify-content: space-between;
     align-items: center;
-    margin-bottom: 0.5rem;
   }
 
-  h1 {
+  .page-header h1 {
     margin: 0;
-    font-size: 2rem;
+    font-size: 22px;
+    font-weight: 600;
+    color: #1d1d1f;
   }
 
-  .subtitle {
-    color: #666;
-    margin-bottom: 2rem;
-    font-size: 1rem;
-  }
-
-  .back-link {
-    color: #646cff;
-    text-decoration: none;
-    font-weight: 500;
-    padding: 0.5rem 1rem;
+  .btn-clear {
+    padding: 5px 14px;
+    border: none;
     border-radius: 6px;
-    transition: background-color 0.2s;
+    background: #ff3b30;
+    color: white;
+    font-size: 13px;
+    font-family: inherit;
+    cursor: pointer;
   }
 
-  .back-link:hover {
-    background-color: rgba(100, 108, 255, 0.1);
+  .btn-clear:hover:not(:disabled) {
+    background: #d62518;
   }
 
-  .controls {
+  .btn-clear:disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+  }
+
+  .content-layout {
+    flex: 1;
     display: flex;
-    gap: 1rem;
-    margin-bottom: 1.5rem;
+    min-height: 0;
+  }
+
+  .list-panel {
+    width: 260px;
+    border-right: 1px solid rgba(0, 0, 0, 0.1);
+    display: flex;
+    flex-direction: column;
+    flex-shrink: 0;
+  }
+
+  .search-bar {
+    padding: 12px;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.1);
   }
 
   .search-input {
-    flex: 1;
-    padding: 0.6rem 1rem;
-    border: 1px solid #ddd;
+    width: 100%;
+    padding: 6px 10px;
+    border: 1px solid rgba(0, 0, 0, 0.2);
     border-radius: 6px;
-    font-size: 0.95rem;
+    font-size: 13px;
+    font-family: inherit;
+    background: #ffffff;
+    color: #1d1d1f;
   }
 
   .search-input:focus {
     outline: none;
-    border-color: #646cff;
+    border-color: #007aff;
   }
 
-  .btn {
-    padding: 0.6rem 1.2rem;
-    border: none;
-    border-radius: 6px;
-    font-weight: 500;
-    cursor: pointer;
-    transition: all 0.2s;
-  }
-
-  .btn:disabled {
-    opacity: 0.5;
-    cursor: not-allowed;
-  }
-
-  .btn-danger {
-    background: #ff4444;
-    color: white;
-  }
-
-  .btn-danger:hover:not(:disabled) {
-    background: #cc0000;
-  }
-
-  .loading, .empty-state {
-    text-align: center;
-    padding: 3rem;
-    color: #666;
-  }
-
-  .empty-state .hint {
-    font-size: 0.9rem;
-    margin-top: 0.5rem;
+  .search-input::placeholder {
+    color: #86868b;
   }
 
   .history-list {
-    display: flex;
-    flex-direction: column;
-    gap: 1rem;
+    flex: 1;
+    overflow-y: auto;
   }
 
-  .history-item {
-    border: 1px solid #e0e0e0;
-    border-radius: 8px;
-    padding: 1rem;
-    background: #fff;
-    transition: box-shadow 0.2s;
+  .empty-message {
+    padding: 40px 20px;
+    text-align: center;
+    font-size: 13px;
+    color: #86868b;
   }
 
-  .history-item:hover {
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  .history-row {
+    width: 100%;
+    padding: 10px 12px;
+    border: none;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.08);
+    background: transparent;
+    text-align: left;
+    cursor: pointer;
+    font-family: inherit;
   }
 
-  .history-header {
+  .history-row:hover {
+    background: rgba(0, 0, 0, 0.03);
+  }
+
+  .history-row.selected {
+    background: rgba(0, 122, 255, 0.15);
+  }
+
+  .row-header {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    margin-bottom: 0.75rem;
+    margin-bottom: 4px;
   }
 
-  .history-info {
-    display: flex;
-    gap: 1rem;
-    align-items: center;
-  }
-
-  .template-name {
-    font-weight: 600;
-    color: #333;
-  }
-
-  .timestamp {
-    font-size: 0.85rem;
-    color: #999;
-  }
-
-  .expand-btn {
-    background: #f5f5f5;
-    border: 1px solid #ddd;
-    border-radius: 4px;
-    width: 32px;
-    height: 32px;
-    cursor: pointer;
-    font-size: 1.2rem;
-    font-weight: bold;
-    transition: all 0.2s;
-  }
-
-  .expand-btn:hover {
-    background: #e5e5e5;
-  }
-
-  .preview-section {
-    display: flex;
-    flex-direction: column;
-    gap: 0.5rem;
-  }
-
-  .preview-item {
-    display: flex;
-    gap: 0.5rem;
-    font-size: 0.9rem;
-  }
-
-  .preview-label {
+  .row-template {
+    font-size: 13px;
     font-weight: 500;
-    color: #666;
-    min-width: 60px;
+    color: #1d1d1f;
   }
 
-  .preview-text {
-    color: #333;
-    flex: 1;
+  .row-time {
+    font-size: 11px;
+    color: #86868b;
+  }
+
+  .row-preview {
+    font-size: 12px;
+    color: #86868b;
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
   }
 
-  .expanded-content {
-    margin-top: 1rem;
-    padding-top: 1rem;
-    border-top: 1px solid #e0e0e0;
+  .detail-panel {
+    flex: 1;
     display: flex;
     flex-direction: column;
-    gap: 1rem;
+    overflow: hidden;
   }
 
-  .full-content {
-    background: #f9f9f9;
-    border-radius: 6px;
-    padding: 1rem;
+  .detail-content {
+    flex: 1;
+    padding: 20px;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
   }
 
-  .content-header {
+  .detail-section {
+    flex-shrink: 0;
+  }
+
+  .detail-header {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    margin-bottom: 0.5rem;
+    margin-bottom: 10px;
   }
 
-  .content-header strong {
-    font-size: 0.9rem;
-    color: #666;
+  .detail-title {
+    font-size: 14px;
+    font-weight: 600;
+    color: #1d1d1f;
   }
 
-  .copy-btn {
-    background: #646cff;
-    color: white;
+  .btn-copy {
+    padding: 4px 12px;
     border: none;
-    padding: 0.4rem 0.8rem;
-    border-radius: 4px;
-    font-size: 0.85rem;
+    border-radius: 6px;
+    background: rgba(0, 122, 255, 0.1);
+    color: #007aff;
+    font-size: 12px;
+    font-family: inherit;
     cursor: pointer;
-    transition: background 0.2s;
   }
 
-  .copy-btn:hover {
-    background: #535ac8;
+  .btn-copy:hover {
+    background: rgba(0, 122, 255, 0.2);
   }
 
-  .content-text {
-    margin: 0;
-    padding: 0.75rem;
-    background: #fff;
-    border: 1px solid #e0e0e0;
-    border-radius: 4px;
-    font-family: 'Courier New', monospace;
-    font-size: 0.85rem;
+  .detail-text {
+    padding: 12px;
+    background: rgba(0, 0, 0, 0.03);
+    border-radius: 8px;
+    font-size: 13px;
+    line-height: 1.6;
+    color: #1d1d1f;
     white-space: pre-wrap;
     word-wrap: break-word;
-    color: #333;
-    max-height: 300px;
+    max-height: 200px;
     overflow-y: auto;
   }
 
+  .empty-detail {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .empty-detail span {
+    font-size: 13px;
+    color: #86868b;
+  }
+
   @media (prefers-color-scheme: dark) {
-    .subtitle {
-      color: #aaa;
+    .page-header {
+      border-bottom-color: rgba(255, 255, 255, 0.1);
+    }
+
+    .page-header h1,
+    .row-template,
+    .detail-title,
+    .detail-text {
+      color: #f5f5f7;
+    }
+
+    .list-panel {
+      border-right-color: rgba(255, 255, 255, 0.1);
+    }
+
+    .search-bar {
+      border-bottom-color: rgba(255, 255, 255, 0.1);
     }
 
     .search-input {
-      background: #2a2a2a;
-      border-color: #444;
-      color: #fff;
+      background: rgba(255, 255, 255, 0.1);
+      border-color: rgba(255, 255, 255, 0.2);
+      color: #f5f5f7;
     }
 
-    .loading, .empty-state {
-      color: #aaa;
+    .history-row {
+      border-bottom-color: rgba(255, 255, 255, 0.08);
     }
 
-    .history-item {
-      background: #1a1a1a;
-      border-color: #444;
+    .history-row:hover {
+      background: rgba(255, 255, 255, 0.05);
     }
 
-    .template-name {
-      color: #fff;
+    .history-row.selected {
+      background: rgba(10, 132, 255, 0.25);
     }
 
-    .timestamp {
-      color: #777;
+    .detail-text {
+      background: rgba(255, 255, 255, 0.05);
     }
 
-    .expand-btn {
-      background: #2a2a2a;
-      border-color: #444;
-      color: #fff;
+    .btn-copy {
+      background: rgba(10, 132, 255, 0.2);
+      color: #0a84ff;
     }
 
-    .expand-btn:hover {
-      background: #333;
-    }
-
-    .preview-label {
-      color: #aaa;
-    }
-
-    .preview-text {
-      color: #ddd;
-    }
-
-    .expanded-content {
-      border-top-color: #333;
-    }
-
-    .full-content {
-      background: #2a2a2a;
-    }
-
-    .content-header strong {
-      color: #aaa;
-    }
-
-    .content-text {
-      background: #1a1a1a;
-      border-color: #444;
-      color: #ddd;
+    .btn-copy:hover {
+      background: rgba(10, 132, 255, 0.3);
     }
   }
 </style>

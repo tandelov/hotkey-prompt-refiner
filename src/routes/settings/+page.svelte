@@ -25,7 +25,6 @@
   }
 
   async function handleModelChange() {
-    // Debounce model changes to avoid too many API calls
     if (modelChangeTimeout) {
       clearTimeout(modelChangeTimeout);
     }
@@ -33,7 +32,6 @@
     modelChangeTimeout = setTimeout(async () => {
       try {
         await invoke("set_default_model", { model: defaultModel });
-        console.log("Model updated:", defaultModel);
       } catch (err) {
         console.error("Failed to save model:", err);
       }
@@ -59,7 +57,7 @@
   async function handleTemplateSave(template) {
     showEditor = false;
     editingTemplate = null;
-    await loadSettings(); // Reload templates
+    await loadSettings();
   }
 
   function handleTemplateCancel() {
@@ -71,13 +69,13 @@
    * @param {string} templateId
    */
   async function handleDeleteTemplate(templateId) {
-    if (!confirm("Are you sure you want to delete this template?")) {
+    if (!confirm("Delete this template?")) {
       return;
     }
 
     try {
       await invoke("delete_template", { id: templateId });
-      await loadSettings(); // Reload templates
+      await loadSettings();
     } catch (err) {
       console.error("Failed to delete template:", err);
       alert(`Failed to delete template: ${err}`);
@@ -96,48 +94,47 @@
       }
     } catch (err) {
       console.error("Failed to toggle auto-launch:", err);
-      alert(`Failed to change auto-launch setting: ${err}`);
+      alert(`Failed to change auto-launch: ${err}`);
     } finally {
       autoLaunchLoading = false;
     }
   }
 
-  // Load settings on mount
   loadSettings();
 </script>
 
-<main class="container">
-  <div class="header">
+<div class="settings-page">
+  <div class="page-header">
     <h1>Settings</h1>
-    <a href="/" class="back-link">← Back to Home</a>
   </div>
 
-  <p class="subtitle">Configure your API key, prompt templates, and hotkeys.</p>
-
-  <div class="settings-sections">
+  <div class="content-area">
     <!-- API Key Section -->
-    <ApiKeyInput />
+    <div class="section">
+      <div class="section-header">
+        <h2>API Configuration</h2>
+      </div>
+      <ApiKeyInput />
+    </div>
 
-    <!-- Model Selection Section -->
-    <section class="settings-section">
-      <h2>Default Model</h2>
-      <p class="description">Choose the Claude model to use for processing prompts.</p>
-      <select bind:value={defaultModel} onchange={handleModelChange} class="model-select">
-        <option value="claude-3-5-haiku-20241022">Claude 3.5 Haiku (Fast & Cost-Effective)</option>
-        <option value="claude-3-5-sonnet-20241022">Claude 3.5 Sonnet (Balanced)</option>
-        <option value="claude-3-opus-20240229">Claude 3 Opus (Most Capable)</option>
-      </select>
-    </section>
+    <!-- Model & Options -->
+    <div class="section">
+      <div class="section-header">
+        <h2>Model & Preferences</h2>
+      </div>
+      <div class="form-row">
+        <label for="model-select">Default Model</label>
+        <select id="model-select" bind:value={defaultModel} onchange={handleModelChange}>
+          <option value="claude-3-5-haiku-20241022">Claude 3.5 Haiku</option>
+          <option value="claude-3-5-sonnet-20241022">Claude 3.5 Sonnet</option>
+          <option value="claude-3-opus-20240229">Claude 3 Opus</option>
+        </select>
+      </div>
 
-    <!-- Application Settings Section -->
-    <section class="settings-section">
-      <h2>Application Settings</h2>
-      <p class="description">Configure application behavior and preferences.</p>
-
-      <div class="setting-item">
-        <div class="setting-info">
-          <strong>Launch at Login</strong>
-          <p class="setting-hint">Automatically start the app when you log in to your computer.</p>
+      <div class="form-row toggle-row">
+        <div class="toggle-label">
+          <span>Launch at Login</span>
+          <span class="hint">Start app when you log in</span>
         </div>
         <label class="toggle-switch">
           <input
@@ -146,47 +143,44 @@
             onchange={handleAutoLaunchToggle}
             disabled={autoLaunchLoading}
           />
-          <span class="toggle-slider"></span>
+          <span class="slider"></span>
         </label>
       </div>
-    </section>
+    </div>
 
-    <!-- Prompt Templates Section -->
-    <section class="settings-section">
-      <h2>Prompt Templates</h2>
-      <p class="description">Create and manage prompt templates with custom hotkeys.</p>
+    <!-- Templates Section -->
+    <div class="section section-grow">
+      <div class="section-header">
+        <h2>Templates</h2>
+        <button class="btn-add" onclick={openNewTemplate}>+</button>
+      </div>
 
       {#if templates.length === 0}
-        <div class="empty-state">
-          <p>No templates yet. Create your first template to get started!</p>
-          <button class="btn btn-primary" onclick={openNewTemplate}>+ Add Template</button>
+        <div class="empty-templates">
+          <p>No templates yet</p>
+          <button onclick={openNewTemplate}>Create Template</button>
         </div>
       {:else}
-        <div class="templates-list">
+        <div class="templates-scroll">
           {#each templates as template (template.id)}
-            <div class="template-item">
-              <div class="template-header">
-                <h3>{template.name}</h3>
+            <div class="template-row">
+              <div class="template-info">
+                <div class="template-name">{template.name}</div>
                 {#if template.hotkey}
-                  <span class="hotkey-badge">{template.hotkey}</span>
+                  <div class="template-hotkey">{template.hotkey}</div>
                 {/if}
               </div>
-              <p class="template-description">{template.description || "No description"}</p>
-              <div class="template-preview">
-                <code>{template.prompt.substring(0, 100)}{template.prompt.length > 100 ? '...' : ''}</code>
-              </div>
               <div class="template-actions">
-                <button class="btn-small btn-secondary" onclick={() => openEditTemplate(template)}>Edit</button>
-                <button class="btn-small btn-danger" onclick={() => handleDeleteTemplate(template.id)}>Delete</button>
+                <button class="btn-icon" onclick={() => openEditTemplate(template)} title="Edit">✎</button>
+                <button class="btn-icon btn-danger" onclick={() => handleDeleteTemplate(template.id)} title="Delete">×</button>
               </div>
             </div>
           {/each}
         </div>
-        <button class="btn btn-primary" onclick={openNewTemplate}>+ Add Template</button>
       {/if}
-    </section>
+    </div>
   </div>
-</main>
+</div>
 
 {#if showEditor}
   <TemplateEditor
@@ -197,234 +191,118 @@
 {/if}
 
 <style>
-  .container {
-    padding: 2rem;
-    max-width: 900px;
-    margin: 0 auto;
-    min-height: 100vh;
-  }
-
-  .header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 0.5rem;
-  }
-
-  h1 {
-    margin: 0;
-    font-size: 2rem;
-  }
-
-  .subtitle {
-    color: #666;
-    margin-bottom: 2rem;
-    font-size: 1rem;
-  }
-
-  .back-link {
-    color: #646cff;
-    text-decoration: none;
-    font-weight: 500;
-    padding: 0.5rem 1rem;
-    border-radius: 6px;
-    transition: background-color 0.2s;
-  }
-
-  .back-link:hover {
-    background-color: rgba(100, 108, 255, 0.1);
-  }
-
-  .settings-sections {
+  .settings-page {
     display: flex;
     flex-direction: column;
-    gap: 1.5rem;
-  }
-
-  .settings-section {
-    padding: 1.5rem;
-    border: 1px solid #ddd;
-    border-radius: 8px;
-    background: #fff;
-  }
-
-  .settings-section h2 {
-    margin-top: 0;
-    margin-bottom: 0.5rem;
-    font-size: 1.25rem;
-  }
-
-  .description {
-    color: #666;
-    margin-bottom: 1rem;
-    font-size: 0.9rem;
-  }
-
-  .model-select {
-    width: 100%;
-    padding: 0.6rem 1rem;
-    border: 1px solid #ddd;
-    border-radius: 6px;
-    font-size: 0.95rem;
-    background: #fff;
-    cursor: pointer;
-  }
-
-  .model-select:focus {
-    outline: none;
-    border-color: #646cff;
-  }
-
-  .empty-state {
-    text-align: center;
-    padding: 2rem;
-    background: #f9f9f9;
-    border-radius: 6px;
-  }
-
-  .empty-state p {
-    color: #666;
-    margin-bottom: 1rem;
-  }
-
-  .templates-list {
-    display: flex;
-    flex-direction: column;
-    gap: 1rem;
-    margin-bottom: 1rem;
-  }
-
-  .template-item {
-    padding: 1rem;
-    border: 1px solid #e0e0e0;
-    border-radius: 6px;
-    background: #fafafa;
-  }
-
-  .template-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 0.5rem;
-  }
-
-  .template-header h3 {
-    margin: 0;
-    font-size: 1.1rem;
-  }
-
-  .hotkey-badge {
-    background: #646cff;
-    color: white;
-    padding: 0.25rem 0.75rem;
-    border-radius: 4px;
-    font-size: 0.85rem;
-    font-weight: 500;
-  }
-
-  .template-description {
-    color: #666;
-    font-size: 0.9rem;
-    margin-bottom: 0.5rem;
-  }
-
-  .template-preview {
-    background: #f5f5f5;
-    padding: 0.5rem;
-    border-radius: 4px;
-    margin-bottom: 0.75rem;
-    font-size: 0.85rem;
+    height: 100%;
     overflow: hidden;
   }
 
-  .template-preview code {
-    color: #333;
-    font-family: 'Courier New', monospace;
+  .page-header {
+    padding: 20px 24px 16px;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+    flex-shrink: 0;
   }
 
-  .template-actions {
+  .page-header h1 {
+    margin: 0;
+    font-size: 22px;
+    font-weight: 600;
+    color: #1d1d1f;
+  }
+
+  .content-area {
+    flex: 1;
+    overflow-y: auto;
+    padding: 16px 24px 24px;
     display: flex;
-    gap: 0.5rem;
+    flex-direction: column;
+    gap: 20px;
   }
 
-  .btn, .btn-small {
-    border: none;
-    border-radius: 6px;
-    font-weight: 500;
-    cursor: pointer;
-    transition: all 0.2s;
+  .section {
+    flex-shrink: 0;
   }
 
-  .btn {
-    padding: 0.6rem 1.2rem;
+  .section-grow {
+    flex: 1;
+    min-height: 0;
+    display: flex;
+    flex-direction: column;
   }
 
-  .btn-small {
-    padding: 0.4rem 0.8rem;
-    font-size: 0.85rem;
-  }
-
-  .btn-primary {
-    background: #646cff;
-    color: white;
-  }
-
-  .btn-primary:hover {
-    background: #535ac8;
-  }
-
-  .btn-secondary {
-    background: #f5f5f5;
-    color: #333;
-    border: 1px solid #ddd;
-  }
-
-  .btn-secondary:hover {
-    background: #e5e5e5;
-  }
-
-  .btn-danger {
-    background: #ff4444;
-    color: white;
-  }
-
-  .btn-danger:hover {
-    background: #cc0000;
-  }
-
-  .setting-item {
+  .section-header {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding: 1rem 0;
-    border-bottom: 1px solid #e0e0e0;
+    margin-bottom: 12px;
   }
 
-  .setting-item:last-child {
+  .section-header h2 {
+    margin: 0;
+    font-size: 15px;
+    font-weight: 600;
+    color: #1d1d1f;
+  }
+
+  .form-row {
+    display: flex;
+    align-items: center;
+    padding: 10px 0;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.08);
+  }
+
+  .form-row:last-child {
     border-bottom: none;
   }
 
-  .setting-info {
+  .form-row label {
+    flex: 0 0 140px;
+    font-size: 13px;
+    color: #1d1d1f;
+  }
+
+  .form-row select {
     flex: 1;
+    padding: 5px 8px;
+    border: 1px solid rgba(0, 0, 0, 0.2);
+    border-radius: 6px;
+    background: #ffffff;
+    font-size: 13px;
+    font-family: inherit;
+    color: #1d1d1f;
   }
 
-  .setting-info strong {
-    display: block;
-    margin-bottom: 0.25rem;
-    color: #333;
+  .form-row select:focus {
+    outline: none;
+    border-color: #007aff;
   }
 
-  .setting-hint {
-    margin: 0;
-    font-size: 0.85rem;
-    color: #666;
+  .toggle-row {
+    justify-content: space-between;
   }
 
-  /* Toggle Switch */
+  .toggle-label {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+  }
+
+  .toggle-label span:first-child {
+    font-size: 13px;
+    color: #1d1d1f;
+  }
+
+  .hint {
+    font-size: 11px;
+    color: #86868b;
+  }
+
   .toggle-switch {
     position: relative;
     display: inline-block;
-    width: 50px;
+    width: 42px;
     height: 26px;
   }
 
@@ -434,112 +312,233 @@
     height: 0;
   }
 
-  .toggle-slider {
+  .slider {
     position: absolute;
     cursor: pointer;
     top: 0;
     left: 0;
     right: 0;
     bottom: 0;
-    background-color: #ccc;
-    transition: 0.3s;
+    background-color: #e0e0e0;
+    transition: 0.2s;
     border-radius: 26px;
   }
 
-  .toggle-slider:before {
+  .slider:before {
     position: absolute;
     content: "";
-    height: 20px;
-    width: 20px;
-    left: 3px;
-    bottom: 3px;
+    height: 22px;
+    width: 22px;
+    left: 2px;
+    bottom: 2px;
     background-color: white;
-    transition: 0.3s;
+    transition: 0.2s;
     border-radius: 50%;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
   }
 
-  .toggle-switch input:checked + .toggle-slider {
-    background-color: #646cff;
+  .toggle-switch input:checked + .slider {
+    background-color: #34c759;
   }
 
-  .toggle-switch input:checked + .toggle-slider:before {
-    transform: translateX(24px);
+  .toggle-switch input:checked + .slider:before {
+    transform: translateX(16px);
   }
 
-  .toggle-switch input:disabled + .toggle-slider {
+  .toggle-switch input:disabled + .slider {
     opacity: 0.5;
     cursor: not-allowed;
   }
 
+  .btn-add {
+    width: 24px;
+    height: 24px;
+    border-radius: 6px;
+    border: none;
+    background: #007aff;
+    color: white;
+    font-size: 18px;
+    line-height: 1;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0;
+  }
+
+  .btn-add:hover {
+    background: #0051d5;
+  }
+
+  .empty-templates {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    padding: 40px 20px;
+    background: rgba(0, 0, 0, 0.02);
+    border-radius: 8px;
+  }
+
+  .empty-templates p {
+    margin: 0;
+    font-size: 13px;
+    color: #86868b;
+  }
+
+  .empty-templates button {
+    padding: 6px 16px;
+    border: none;
+    border-radius: 6px;
+    background: #007aff;
+    color: white;
+    font-size: 13px;
+    font-family: inherit;
+    cursor: pointer;
+  }
+
+  .empty-templates button:hover {
+    background: #0051d5;
+  }
+
+  .templates-scroll {
+    flex: 1;
+    overflow-y: auto;
+    margin: -4px;
+    padding: 4px;
+  }
+
+  .template-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 10px 12px;
+    border-radius: 6px;
+    background: rgba(0, 0, 0, 0.03);
+    margin-bottom: 6px;
+  }
+
+  .template-row:hover {
+    background: rgba(0, 0, 0, 0.05);
+  }
+
+  .template-info {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    min-width: 0;
+  }
+
+  .template-name {
+    font-size: 13px;
+    color: #1d1d1f;
+    font-weight: 500;
+    flex: 1;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .template-hotkey {
+    font-size: 11px;
+    padding: 3px 8px;
+    background: rgba(0, 122, 255, 0.15);
+    color: #007aff;
+    border-radius: 4px;
+    font-weight: 500;
+    flex-shrink: 0;
+  }
+
+  .template-actions {
+    display: flex;
+    gap: 4px;
+  }
+
+  .btn-icon {
+    width: 28px;
+    height: 28px;
+    border: none;
+    border-radius: 6px;
+    background: transparent;
+    color: #1d1d1f;
+    font-size: 16px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0;
+  }
+
+  .btn-icon:hover {
+    background: rgba(0, 0, 0, 0.08);
+  }
+
+  .btn-icon.btn-danger {
+    color: #ff3b30;
+  }
+
+  .btn-icon.btn-danger:hover {
+    background: rgba(255, 59, 48, 0.1);
+  }
+
   @media (prefers-color-scheme: dark) {
-    .subtitle {
-      color: #aaa;
+    .page-header {
+      border-bottom-color: rgba(255, 255, 255, 0.1);
     }
 
-    .settings-section {
-      background: #1a1a1a;
-      border-color: #444;
+    .page-header h1,
+    .section-header h2,
+    .form-row label,
+    .toggle-label span:first-child,
+    .template-name,
+    .btn-icon {
+      color: #f5f5f7;
     }
 
-    .description {
-      color: #aaa;
+    .form-row {
+      border-bottom-color: rgba(255, 255, 255, 0.08);
     }
 
-    .model-select {
-      background: #2a2a2a;
-      border-color: #444;
-      color: #fff;
+    .form-row select {
+      background: rgba(255, 255, 255, 0.1);
+      border-color: rgba(255, 255, 255, 0.2);
+      color: #f5f5f7;
     }
 
-    .empty-state {
-      background: #2a2a2a;
+    .slider {
+      background-color: #3a3a3c;
     }
 
-    .empty-state p {
-      color: #aaa;
+    .empty-templates {
+      background: rgba(255, 255, 255, 0.05);
     }
 
-    .template-item {
-      background: #2a2a2a;
-      border-color: #444;
+    .empty-templates p {
+      color: #98989d;
     }
 
-    .template-description {
-      color: #aaa;
+    .template-row {
+      background: rgba(255, 255, 255, 0.05);
     }
 
-    .template-preview {
-      background: #2a2a2a;
+    .template-row:hover {
+      background: rgba(255, 255, 255, 0.08);
     }
 
-    .template-preview code {
-      color: #ddd;
+    .template-hotkey {
+      background: rgba(10, 132, 255, 0.25);
+      color: #0a84ff;
     }
 
-    .btn-secondary {
-      background: #2a2a2a;
-      color: #fff;
-      border-color: #444;
+    .btn-icon:hover {
+      background: rgba(255, 255, 255, 0.1);
     }
 
-    .btn-secondary:hover {
-      background: #333;
-    }
-
-    .setting-item {
-      border-bottom-color: #333;
-    }
-
-    .setting-info strong {
-      color: #fff;
-    }
-
-    .setting-hint {
-      color: #aaa;
-    }
-
-    .toggle-slider {
-      background-color: #444;
+    .btn-icon.btn-danger:hover {
+      background: rgba(255, 69, 58, 0.2);
     }
   }
 </style>

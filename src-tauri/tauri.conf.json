@@ -13,12 +13,15 @@
     "windows": [
       {
         "title": "Hotkey Prompt Refiner",
-        "width": 900,
-        "height": 700,
+        "width": 780,
+        "height": 580,
         "resizable": true,
+        "minWidth": 700,
+        "minHeight": 500,
         "center": true,
         "skipTaskbar": false,
-        "visible": true
+        "visible": true,
+        "titleBarStyle": "Overlay"
       }
     ],
     "security": {
