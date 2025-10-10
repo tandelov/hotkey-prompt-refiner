@@ -234,8 +234,7 @@
   }
 
   .section-grow {
-    flex: 1;
-    min-height: 0;
+    flex-shrink: 0;
     display: flex;
     flex-direction: column;
   }
@@ -289,10 +288,10 @@
 
     /* Visual styling to match NSPopUpButton */
     background-color: rgba(0, 0, 0, 0.05);
-    background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 12 12"><path fill="%239A9A9A" d="M6 8L2 4h8z"/></svg>');
+    background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="10" height="12" viewBox="0 0 10 12"><path fill="%239A9A9A" d="M5 3L2 6h6zM5 9l3-3H2z"/></svg>');
     background-repeat: no-repeat;
-    background-position: right 8px center;
-    background-size: 12px;
+    background-position: right 10px center;
+    background-size: 10px 12px;
     border: 1px solid rgba(0, 0, 0, 0.15);
     border-radius: 6px;
 
@@ -315,6 +314,7 @@
   .toggle-row {
     grid-template-columns: 1fr auto;
     gap: 12px;
+    align-items: center;
   }
 
   .toggle-label {
@@ -372,7 +372,7 @@
     background-color: white;
     transition: transform 0.2s ease-in-out;
     border-radius: 50%;
-    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.15);
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.12), 0 1px 2px rgba(0, 0, 0, 0.08);
   }
 
   /* "On" state styling */
@@ -391,10 +391,8 @@
   }
 
   .templates-container {
-    flex: 1;
     display: flex;
     flex-direction: column;
-    min-height: 0;
   }
 
   .list-footer-bar {
@@ -461,10 +459,9 @@
   }
 
   .templates-scroll {
-    flex: 1;
-    overflow-y: auto;
-    margin: -4px;
-    padding: 4px;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
   }
 
   .template-row {
@@ -474,7 +471,6 @@
     padding: 10px 12px;
     border-radius: 6px;
     background: rgba(0, 0, 0, 0.03);
-    margin-bottom: 6px;
   }
 
   .template-row:hover {
@@ -567,7 +563,7 @@
 
     .form-row select {
       background-color: rgba(255, 255, 255, 0.1);
-      background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 12 12"><path fill="%23CFCFCF" d="M6 8L2 4h8z"/></svg>');
+      background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="10" height="12" viewBox="0 0 10 12"><path fill="%23CFCFCF" d="M5 3L2 6h6zM5 9l3-3H2z"/></svg>');
       border-color: rgba(255, 255, 255, 0.15);
       color: #E0E0E0;
     }
