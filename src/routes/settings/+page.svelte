@@ -5,7 +5,7 @@
 
   /** @type {any[]} */
   let templates = $state([]);
-  let defaultModel = $state("claude-3-5-haiku-20241022");
+  let defaultModel = $state("claude-sonnet-4-5-20250929");
   let showEditor = $state(false);
   /** @type {any} */
   let editingTemplate = $state(null);
@@ -125,9 +125,8 @@
       <div class="form-row">
         <label for="model-select">Default Model</label>
         <select id="model-select" bind:value={defaultModel} onchange={handleModelChange}>
-          <option value="claude-3-5-haiku-20241022">Claude 3.5 Haiku</option>
-          <option value="claude-3-5-sonnet-20241022">Claude 3.5 Sonnet</option>
-          <option value="claude-3-opus-20240229">Claude 3 Opus</option>
+          <option value="claude-sonnet-4-5-20250929">Claude Sonnet 4.5 (best performance, good speed)</option>
+          <option value="claude-3-5-haiku-latest">Claude Haiku 3.5 (good performance, great speed)</option>
         </select>
       </div>
 
