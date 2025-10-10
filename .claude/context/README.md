@@ -30,9 +30,6 @@ When fully initialized, this directory contains:
 - **`product-context.md`** - Product requirements, target users, and core functionality
 
 ## Context Commands
-
-Use these commands to manage your project context:
-
 ### Initialize Context
 ```bash
 /context:create

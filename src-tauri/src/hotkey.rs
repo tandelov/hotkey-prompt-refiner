@@ -41,25 +41,95 @@ pub struct HotkeyManager {
 }
 
 impl HotkeyManager {
-    /// Create a new hotkey manager with default hotkey (Cmd+Shift+P / Ctrl+Shift+P)
-    pub fn new() -> Result<Self, HotkeyError> {
+    /// Create a new hotkey manager with configurable hotkey
+    pub fn new(modifiers_str: &str, key_str: &str) -> Result<Self, HotkeyError> {
         // Create the global hotkey manager
         let manager = GlobalHotKeyManager::new()
             .map_err(|e| HotkeyError::ManagerCreationFailed(e.to_string()))?;
 
-        // Define the hotkey: Cmd+Shift+] on macOS, Ctrl+Shift+] on Windows/Linux
-        #[cfg(target_os = "macos")]
-        let modifiers = Modifiers::SUPER | Modifiers::SHIFT;
+        // Parse modifiers from config
+        let modifiers = Self::parse_modifiers(modifiers_str)?;
 
-        #[cfg(not(target_os = "macos"))]
-        let modifiers = Modifiers::CONTROL | Modifiers::SHIFT;
+        // Parse key code from config
+        let key_code = Self::parse_key_code(key_str)?;
 
-        let hotkey = HotKey::new(Some(modifiers), Code::BracketRight);
+        let hotkey = HotKey::new(Some(modifiers), key_code);
 
         Ok(Self {
             manager,
             hotkey,
         })
+    }
+
+    /// Parse modifier keys from string (e.g., "cmd+shift", "ctrl+alt")
+    fn parse_modifiers(modifiers_str: &str) -> Result<Modifiers, HotkeyError> {
+        let mut modifiers = Modifiers::empty();
+
+        for part in modifiers_str.to_lowercase().split('+') {
+            match part.trim() {
+                "cmd" | "super" => modifiers |= Modifiers::SUPER,
+                "ctrl" | "control" => modifiers |= Modifiers::CONTROL,
+                "alt" | "option" => modifiers |= Modifiers::ALT,
+                "shift" => modifiers |= Modifiers::SHIFT,
+                "" => {}, // ignore empty parts
+                unknown => {
+                    return Err(HotkeyError::RegistrationFailed(
+                        format!("Unknown modifier: {}", unknown)
+                    ));
+                }
+            }
+        }
+
+        Ok(modifiers)
+    }
+
+    /// Parse key code from string (e.g., "BracketRight", "KeyP")
+    fn parse_key_code(key_str: &str) -> Result<Code, HotkeyError> {
+        match key_str {
+            "BracketRight" => Ok(Code::BracketRight),
+            "BracketLeft" => Ok(Code::BracketLeft),
+            "KeyP" => Ok(Code::KeyP),
+            "KeyK" => Ok(Code::KeyK),
+            "Semicolon" => Ok(Code::Semicolon),
+            "Space" => Ok(Code::Space),
+            "Enter" => Ok(Code::Enter),
+            "Backslash" => Ok(Code::Backslash),
+            _ => Err(HotkeyError::RegistrationFailed(
+                format!("Unknown key code: {}. See global-hotkey docs for valid codes.", key_str)
+            )),
+        }
+    }
+
+    /// Get the hotkey description string based on configured modifiers and key
+    pub fn hotkey_description(&self, modifiers_str: &str, key_str: &str) -> String {
+        // Convert modifiers string to display format
+        let mods = modifiers_str
+            .split('+')
+            .map(|m| {
+                match m.trim().to_lowercase().as_str() {
+                    "cmd" | "super" => "Cmd",
+                    "ctrl" | "control" => "Ctrl",
+                    "alt" | "option" => "Alt",
+                    "shift" => "Shift",
+                    _ => m.trim(),
+                }
+            })
+            .collect::<Vec<_>>()
+            .join("+");
+
+        // Convert key code to display format
+        let key = match key_str {
+            "BracketRight" => "]",
+            "BracketLeft" => "[",
+            "Backslash" => "\\",
+            "Semicolon" => ";",
+            "Space" => "Space",
+            "Enter" => "Enter",
+            key if key.starts_with("Key") => &key[3..], // Strip "Key" prefix
+            key => key,
+        };
+
+        format!("{}+{}", mods, key)
     }
 
     /// Register the hotkey
@@ -83,14 +153,6 @@ impl HotkeyManager {
             .map_err(|e| HotkeyError::RegistrationFailed(e.to_string()))
     }
 
-    /// Get the hotkey description string
-    pub fn hotkey_description(&self) -> String {
-        #[cfg(target_os = "macos")]
-        return "Cmd+Shift+]".to_string();
-
-        #[cfg(not(target_os = "macos"))]
-        return "Ctrl+Shift+]".to_string();
-    }
 }
 
 impl Drop for HotkeyManager {
@@ -106,20 +168,37 @@ mod tests {
 
     #[test]
     fn test_hotkey_manager_creation() {
-        let result = HotkeyManager::new();
+        let result = HotkeyManager::new("cmd+shift", "BracketRight");
         assert!(result.is_ok());
     }
 
     #[test]
     fn test_hotkey_description() {
-        let manager = HotkeyManager::new().unwrap();
-        let desc = manager.hotkey_description();
-
-        #[cfg(target_os = "macos")]
+        let manager = HotkeyManager::new("cmd+shift", "BracketRight").unwrap();
+        let desc = manager.hotkey_description("cmd+shift", "BracketRight");
         assert_eq!(desc, "Cmd+Shift+]");
 
-        #[cfg(not(target_os = "macos"))]
-        assert_eq!(desc, "Ctrl+Shift+]");
+        let manager2 = HotkeyManager::new("ctrl+alt", "KeyP").unwrap();
+        let desc2 = manager2.hotkey_description("ctrl+alt", "KeyP");
+        assert_eq!(desc2, "Ctrl+Alt+P");
+    }
+
+    #[test]
+    fn test_parse_modifiers() {
+        let mods = HotkeyManager::parse_modifiers("cmd+shift").unwrap();
+        assert!(mods.contains(Modifiers::SUPER));
+        assert!(mods.contains(Modifiers::SHIFT));
+
+        let mods2 = HotkeyManager::parse_modifiers("ctrl+alt").unwrap();
+        assert!(mods2.contains(Modifiers::CONTROL));
+        assert!(mods2.contains(Modifiers::ALT));
+    }
+
+    #[test]
+    fn test_parse_key_code() {
+        assert!(HotkeyManager::parse_key_code("BracketRight").is_ok());
+        assert!(HotkeyManager::parse_key_code("KeyP").is_ok());
+        assert!(HotkeyManager::parse_key_code("InvalidKey").is_err());
     }
 
 }

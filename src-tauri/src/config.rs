@@ -1,3 +1,4 @@
+use serde::Deserialize;
 use std::fs;
 use std::path::Path;
 
@@ -11,6 +12,7 @@ Provide only the refined prompt without explanation."#;
 pub enum ConfigError {
     MissingApiKey,
     TemplateReadError(std::io::Error),
+    TomlParseError(toml::de::Error),
 }
 
 impl std::fmt::Display for ConfigError {
@@ -22,15 +24,86 @@ impl std::fmt::Display for ConfigError {
             ConfigError::TemplateReadError(e) => {
                 write!(f, "Failed to read prompt template: {}", e)
             }
+            ConfigError::TomlParseError(e) => {
+                write!(f, "Failed to parse config.toml: {}", e)
+            }
         }
     }
 }
 
 impl std::error::Error for ConfigError {}
 
+#[derive(Debug, Deserialize)]
+struct TomlConfig {
+    #[serde(default)]
+    hotkey: HotkeyConfig,
+    #[serde(default)]
+    api: ApiConfig,
+    #[serde(default)]
+    prompt: PromptConfig,
+}
+
+#[derive(Debug, Deserialize)]
+struct HotkeyConfig {
+    #[serde(default = "default_modifiers")]
+    modifiers: String,
+    #[serde(default = "default_key")]
+    key: String,
+}
+
+#[derive(Debug, Deserialize)]
+struct ApiConfig {
+    #[serde(default = "default_model")]
+    model: String,
+    #[serde(default = "default_timeout")]
+    timeout_seconds: u64,
+}
+
+#[derive(Debug, Deserialize)]
+struct PromptConfig {
+    #[serde(default = "default_template_file")]
+    template_file: String,
+}
+
+fn default_modifiers() -> String { "cmd+shift".to_string() }
+fn default_key() -> String { "BracketRight".to_string() }
+fn default_model() -> String { "claude-3-5-haiku-20241022".to_string() }
+fn default_timeout() -> u64 { 30 }
+fn default_template_file() -> String { "prompt_template.txt".to_string() }
+
+impl Default for HotkeyConfig {
+    fn default() -> Self {
+        Self {
+            modifiers: default_modifiers(),
+            key: default_key(),
+        }
+    }
+}
+
+impl Default for ApiConfig {
+    fn default() -> Self {
+        Self {
+            model: default_model(),
+            timeout_seconds: default_timeout(),
+        }
+    }
+}
+
+impl Default for PromptConfig {
+    fn default() -> Self {
+        Self {
+            template_file: default_template_file(),
+        }
+    }
+}
+
 pub struct Config {
     pub api_key: String,
     pub prompt_template: String,
+    pub model: String,
+    pub timeout_seconds: u64,
+    pub hotkey_modifiers: String,
+    pub hotkey_key: String,
 }
 
 impl Config {
@@ -43,19 +116,57 @@ impl Config {
         let api_key = std::env::var("ANTHROPIC_API_KEY")
             .map_err(|_| ConfigError::MissingApiKey)?;
 
-        // Load prompt template from file or use default
-        let prompt_template = Self::load_prompt_template();
+        // Load TOML config or use defaults
+        let toml_config = Self::load_toml_config();
+
+        // Load prompt template from file specified in config
+        let prompt_template = Self::load_prompt_template(&toml_config.prompt.template_file);
 
         Ok(Config {
             api_key,
             prompt_template,
+            model: toml_config.api.model,
+            timeout_seconds: toml_config.api.timeout_seconds,
+            hotkey_modifiers: toml_config.hotkey.modifiers,
+            hotkey_key: toml_config.hotkey.key,
         })
     }
 
-    /// Load prompt template from file, or use default if not found
-    fn load_prompt_template() -> String {
-        let template_path = "prompt_template.txt";
+    /// Load TOML configuration file or use defaults
+    fn load_toml_config() -> TomlConfig {
+        let config_path = "config.toml";
 
+        if Path::new(config_path).exists() {
+            match fs::read_to_string(config_path) {
+                Ok(content) => match toml::from_str(&content) {
+                    Ok(config) => {
+                        println!("✓ Loaded configuration from {}", config_path);
+                        return config;
+                    }
+                    Err(e) => {
+                        println!("⚠ Warning: Could not parse {}: {}", config_path, e);
+                        println!("  Using default configuration");
+                    }
+                },
+                Err(e) => {
+                    println!("⚠ Warning: Could not read {}: {}", config_path, e);
+                    println!("  Using default configuration");
+                }
+            }
+        } else {
+            println!("ℹ Using default configuration (create {} to customize)", config_path);
+        }
+
+        // Return default config
+        TomlConfig {
+            hotkey: HotkeyConfig::default(),
+            api: ApiConfig::default(),
+            prompt: PromptConfig::default(),
+        }
+    }
+
+    /// Load prompt template from file, or use default if not found
+    fn load_prompt_template(template_path: &str) -> String {
         if Path::new(template_path).exists() {
             match fs::read_to_string(template_path) {
                 Ok(content) => {
